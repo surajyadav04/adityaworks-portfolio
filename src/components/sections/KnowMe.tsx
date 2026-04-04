@@ -1,0 +1,255 @@
+"use client";
+
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
+
+/**
+ * KNOW ME — Wireframe → Final Cinematic Heading
+ *
+ * "Thought it." enters as a wireframe sketch (stroke-only),
+ * fills in like ink from left to right,
+ * then transitions into "Built it." — clean, confident, final.
+ */
+export default function KnowMe() {
+  const container = useRef<HTMLElement>(null);
+  const headingBlock = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+    if (!container.current) return;
+
+    // ═══════════════════════════════════════════
+    // 🎬 WIREFRAME → FINAL HEADING TIMELINE
+    // ═══════════════════════════════════════════
+    const headingTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: headingBlock.current,
+        start: "top 80%",
+        end: "top 20%",
+        scrub: 1,
+      },
+    });
+
+    // ✦ Step 1 — Wireframe Entry
+    // "Thought it." fades in as stroke-only outline
+    headingTl.fromTo(
+      ".wireframe-text",
+      {
+        opacity: 0,
+        y: 40,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+      }
+    );
+
+    // ✦ Step 2 — Ink Fill (left → right via gradient mask)
+    // The fill layer is clipped and expands to reveal solid text
+    headingTl.fromTo(
+      ".fill-text",
+      {
+        clipPath: "inset(0 100% 0 0)",
+      },
+      {
+        clipPath: "inset(0 0% 0 0)",
+        duration: 2,
+        ease: "power1.inOut",
+      },
+      "+=0.2"
+    );
+
+    // ✦ Step 3 — Swap: "Thought it." fades, "Built it." enters
+    headingTl.to(
+      ".wireframe-text, .fill-text",
+      {
+        opacity: 0,
+        y: -20,
+        filter: "blur(4px)",
+        duration: 0.8,
+        ease: "power2.in",
+      },
+      "+=0.3"
+    );
+
+    headingTl.fromTo(
+      ".final-text",
+      {
+        opacity: 0,
+        y: 30,
+        scale: 0.95,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1,
+        ease: "power3.out",
+      },
+      "-=0.3"
+    );
+
+    // ═══════════════════════════════════════════
+    // LABEL, BODY, STATS, DIVIDER — Standard reveals
+    // ═══════════════════════════════════════════
+
+    gsap.fromTo(
+      ".knowme-label",
+      { x: -30, opacity: 0 },
+      {
+        x: 0, opacity: 1, duration: 1, ease: "power2.out",
+        scrollTrigger: { trigger: container.current, start: "top 70%" },
+      }
+    );
+
+    gsap.fromTo(
+      ".knowme-line",
+      { y: 40, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1.2, stagger: 0.15, ease: "power3.out",
+        scrollTrigger: { trigger: ".knowme-body", start: "top 80%" },
+      }
+    );
+
+    gsap.fromTo(
+      ".knowme-stat",
+      { y: 50, opacity: 0, scale: 0.9 },
+      {
+        y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.2, ease: "power2.out",
+        scrollTrigger: { trigger: ".knowme-stats", start: "top 85%" },
+      }
+    );
+
+    gsap.fromTo(
+      ".knowme-divider",
+      { scaleX: 0 },
+      {
+        scaleX: 1, duration: 1.5, ease: "power2.inOut",
+        scrollTrigger: { trigger: ".knowme-divider", start: "top 85%" },
+      }
+    );
+  }, { scope: container });
+
+  return (
+    <section
+      ref={container}
+      id="knowme"
+      className="relative w-full bg-background py-8 md:py-12 px-8 md:px-24 overflow-hidden"
+    >
+      {/* Label */}
+      <p className="knowme-label text-xs uppercase tracking-[0.3em] text-accent font-bold mb-12 italic opacity-0">
+        / Know Me
+      </p>
+
+      {/* ═══ CINEMATIC HEADING: Wireframe → Fill → Final ═══ */}
+      <div ref={headingBlock} className="mb-6 md:mb-8 relative">
+        {/* Layer 1: Wireframe (stroke-only outline) */}
+        <h2
+          className="wireframe-text text-section-title leading-[1] opacity-0"
+          style={{
+            WebkitTextStroke: "1.5px #1A1A1A",
+            WebkitTextFillColor: "transparent",
+            color: "transparent",
+          }}
+        >
+          Thought it.
+        </h2>
+
+        {/* Layer 2: Fill (solid text, clipped left→right) */}
+        <h2
+          className="fill-text text-section-title leading-[1] absolute top-0 left-0"
+          style={{
+            color: "#1A1A1A",
+            clipPath: "inset(0 100% 0 0)",
+          }}
+        >
+          Thought it.
+        </h2>
+
+        {/* Layer 3: Final — "Built it." (clean, confident) */}
+        <h2
+          className="final-text text-section-title leading-[1] absolute top-0 left-0 opacity-0"
+        >
+          <span className="text-accent italic font-bold">Built it.</span>
+        </h2>
+      </div>
+
+      {/* Divider */}
+      <div
+        className="knowme-divider w-full h-[1px] bg-text/15 mb-12 md:mb-16 origin-left"
+        style={{ transform: "scaleX(0)" }}
+      />
+
+      {/* Two-Column Content */}
+      <div className="knowme-body grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 mb-16 md:mb-20">
+        {/* Left — Philosophy */}
+        <div className="space-y-6">
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            I believe that every pixel should serve a purpose and every
+            interaction should tell a story. My work lives at the intersection
+            of technological precision and human-centric design.
+          </p>
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            I don&apos;t build products — I craft experiences that don&apos;t just look
+            premium, but feel intentional. The kind that makes you pause, lean
+            in, and wonder how it was made.
+          </p>
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            Architecture taught me that space has emotion. Code taught me that
+            logic has elegance. I bring both to everything I create.
+          </p>
+        </div>
+
+        {/* Right — Mission */}
+        <div className="space-y-6">
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            Some people call it obsession. I call it a quiet refusal to be
+            average. Every project starts with a single question:
+            <span className="text-text font-medium italic">
+              {" "}
+              &ldquo;What would make this unforgettable?&rdquo;
+            </span>
+          </p>
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            From motion systems to brand identities, from creative coding to
+            product design — the thread is always the same: relentless craft,
+            human soul, and an absolute intolerance for mediocrity.
+          </p>
+          <p className="knowme-line text-body text-text-light leading-relaxed opacity-0">
+            This portfolio is not a resume. It&apos;s a manifesto. A declaration
+            that design can be both beautiful and dangerous. That code can be
+            art. That the future belongs to those who refuse to settle.
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div className="knowme-stats grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+        {[
+          { value: "04+", label: "Years of Craft" },
+          { value: "20+", label: "Projects Shipped" },
+          { value: "∞", label: "Curiosity" },
+          { value: "01", label: "Mission" },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className="knowme-stat text-center md:text-left opacity-0"
+          >
+            <p className="text-display text-accent font-bebas leading-none">
+              {stat.value}
+            </p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-light mt-3 font-medium">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
