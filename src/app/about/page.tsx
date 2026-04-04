@@ -11,6 +11,7 @@ export default function AboutPage() {
   const whoText = useRef<HTMLDivElement>(null);
   const amiText = useRef<HTMLDivElement>(null);
   const imageWrapper = useRef<HTMLDivElement>(null);
+  const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -26,37 +27,63 @@ export default function AboutPage() {
       scrollTrigger: {
         trigger: container.current,
         start: "top top",
-        end: "+=120%",
+        end: "+=200%", // Longer sequence for the signature reveal
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
       },
     });
 
-    // Convergence
-    introTl.fromTo(whoText.current, 
-      { y: "-15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
-      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1, ease: "power2.inOut" }
-    )
-    .fromTo(amiText.current, 
-      { y: "15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
-      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1, ease: "power2.inOut" }, 0
-    )
-    .fromTo(imageWrapper.current, 
-      { y: "30vh", opacity: 0, scale: 0.98, filter: "blur(4px) brightness(0.9) contrast(1.2)" },
-      { y: "0vh", opacity: 1, scale: 1, filter: "blur(0px) brightness(1.2) contrast(1.85)", duration: 1.5, ease: "power2.out" }, 0
+    // --- PHASE 1: INITIAL STATE (WHO AM I? CENTERED) ---
+    // Text starts visible (no blank scroll)
+    gsap.set([whoText.current, amiText.current], { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)" });
+    gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
+    gsap.set(".signature-stroke", { strokeDashoffset: 1200, opacity: 0 });
+
+    // --- PHASE 2: PHOTO REVEAL (CONVERGENCE) ---
+    introTl.to(imageWrapper.current, { 
+      opacity: 1, 
+      scale: 1, 
+      filter: "blur(0px) brightness(1.2) contrast(1.85)", 
+      duration: 1.5, 
+      ease: "power2.out" 
+    });
+
+    // --- PHASE 3: EXIT (WHO AM I? SPLITS VERTICALLY) ---
+    introTl.to(whoText.current, { y: "-100vh", opacity: 0, duration: 2, ease: "power4.in" }, "+=0.2")
+           .to(amiText.current, { y: "100vh", opacity: 0, duration: 2, ease: "power4.in" }, "-=2");
+
+    // --- PHASE 4: THE SIGNATURE (ADITYA KUMAR - "Signed" on Scroll) ---
+    introTl.fromTo(".signature-stroke", 
+      { strokeDashoffset: 1200, opacity: 0 },
+      { 
+        strokeDashoffset: 0, 
+        opacity: 1, 
+        duration: 3, 
+        ease: "none", // Linear signing based on scroll
+      }, "-=0.5"
     );
 
-    // Fall Apart / Exit
-    introTl.to(whoText.current, { y: "-100vh", opacity: 0, duration: 1, ease: "power4.in" }, "+=0.2")
-           .to(amiText.current, { y: "100vh", opacity: 0, duration: 1, ease: "power4.in" }, "-=1")
-           .to(imageWrapper.current, { opacity: 0.2, scale: 1.1, duration: 1 }, "-=1");
+    // Fade the Solid Ink Fill in for a finisher
+    introTl.to(".signature-stroke", { 
+      fill: "#D14836", 
+      duration: 1, 
+      ease: "power2.in" 
+    }, "-=0.5");
 
-    // 📖 CONTENT REVEAL
+    // Exit the whole intro for the content reveal
+    introTl.to([imageWrapper.current, signatureWrapper.current], { 
+      opacity: 0, 
+      scale: 1.1, 
+      duration: 1.5, 
+      ease: "power2.inOut" 
+    });
+
+    // 📖 CONTENT REVEAL (SECTION BY SECTION)
     gsap.fromTo(".about-detail-block", 
       { y: 50, opacity: 0 },
       { 
-        y: 0, opacity: 1, duration: 1, stagger: 0.3, ease: "power3.out",
+        y: 0, opacity: 1, duration: 1.2, stagger: 0.4, ease: "power3.out",
         scrollTrigger: { trigger: contentSection.current, start: "top 80%" }
       }
     );
@@ -65,11 +92,21 @@ export default function AboutPage() {
 
   return (
     <main className="relative bg-background min-h-screen">
-      {/* 🎬 HERO: CINEMATIC REVEAL */}
+      {/* 🌫️ SHAKY INK FILTER DEFINITION (For Signature) */}
+      <svg style={{ position: "absolute", width: 0, height: 0 }}>
+        <defs>
+          <filter id="about-signature-ink">
+            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* 🎬 HERO: CINEMATIC REVEAL & SIGNATURE */}
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography */}
+          {/* Typography 1: WHO AM I? */}
           <div ref={whoText} className="absolute top-[15%] left-[2%] z-0 pointer-events-none">
             <h1 className="text-[25vw] font-bebas font-black text-[#8B0000] uppercase italic">WHO</h1>
           </div>
@@ -78,10 +115,24 @@ export default function AboutPage() {
             <h1 className="text-[25vw] font-bebas font-black text-[#8B0000] uppercase italic text-right whitespace-nowrap">AM&nbsp;&nbsp;I?</h1>
           </div>
 
-          {/* Portrait */}
+          {/* Typography 2: SIGNATURE (ADITYA KUMAR) */}
+          <div ref={signatureWrapper} className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none px-4 w-full">
+            <svg className="w-full h-auto overflow-visible" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
+              <text 
+                x="50%" y="54%" 
+                dominantBaseline="middle" textAnchor="middle" 
+                className="signature-stroke font-kalam font-bold text-[18vw] md:text-[14vw] fill-transparent stroke-[#D14836] stroke-[4]"
+                style={{ strokeDasharray: 1200, strokeDashoffset: 1200, paintOrder: "stroke fill", letterSpacing: "-0.05em" }}
+              >
+                Aditya Kumar
+              </text>
+            </svg>
+          </div>
+
+          {/* Portrait Background */}
           <div 
             ref={imageWrapper} 
-            className="absolute inset-0 w-full h-full flex items-center justify-center z-10 pointer-events-none"
+            className="absolute inset-0 w-full h-full flex items-center justify-center z-10 pointer-events-none opacity-0"
             style={{ 
               maskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)", 
               WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" 
@@ -90,7 +141,7 @@ export default function AboutPage() {
             <img 
               src="/images/aditya/ADI (2).png" 
               alt="Aditya" 
-              className="w-full h-full object-contain grayscale opacity-85 contrast-[185%] brightness-[135%] mix-blend-multiply" 
+              className="w-full h-full object-contain grayscale contrast-[185%] brightness-[135%] mix-blend-multiply" 
             />
           </div>
         </div>
@@ -128,7 +179,7 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="about-detail-block mt-32 text-center">
+        <div className="about-detail-block mt-32 text-center border-t border-text/5 pt-24">
           <p className="text-body text-text-light italic max-w-2xl mx-auto px-4">
             &ldquo;This is where we begin. We will add more details here as the journey continues.&rdquo;
           </p>
