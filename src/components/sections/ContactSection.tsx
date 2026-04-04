@@ -199,8 +199,13 @@ export default function ContactSection() {
         </div>
       </div>
 
-      <div className="mt-16 pt-12 border-t border-text/5 flex justify-between items-center text-[10px] text-text-light/30 uppercase tracking-[0.4em]">
-        <span>© 2024 Aditya Works</span>
+      <div className="mt-16 pt-12 border-t border-text/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] text-text-light/30 uppercase tracking-[0.4em]">
+        <div className="flex flex-col gap-2">
+          <span>© 2024 Aditya Works</span>
+          <p className="normal-case tracking-normal max-w-xs opacity-50">
+            This site represents AdityaWorks, a portfolio and digital presence that may also be searched as adityaworks, Aditya Work, or similar variations.
+          </p>
+        </div>
         <span className="hidden md:inline">Designed and Developed in the Void</span>
         <span>Aditya™</span>
       </div>

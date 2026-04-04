@@ -15,6 +15,7 @@
   --foreground: #1A1A1A;
 }
 
+html,
 body {
   background: var(--background);
   color: var(--foreground);
@@ -22,6 +23,17 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* HIDE SCROLLBARS BUT KEEP FUNCTIONAL */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Chrome, Safari and Opera */
+body::-webkit-scrollbar,
+html::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom Cursor */
@@ -50,7 +62,7 @@ body {
   pointer-events: none;
   z-index: 9990;
   opacity: 0.04;
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  background-image: url("/noise.svg");
 }
 
 /* Typography Utilities */

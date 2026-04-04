@@ -39,7 +39,7 @@ export default function Hero() {
   return (
     <section ref={container} className="h-screen flex flex-col justify-center px-8 md:px-24">
       <div className="overflow-hidden pt-4 pb-4">
-        <h1 className="hero-line text-display flex flex-wrap gap-x-6">
+        <h1 className="hero-line text-display flex flex-wrap gap-x-6" aria-label="AdityaWorks">
           <span className="text-text">Aditya</span>
           <span className="text-accent">/Works</span>
         </h1>

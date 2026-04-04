@@ -134,6 +134,15 @@ export default function KnowMe() {
         scrollTrigger: { trigger: ".knowme-divider", start: "top 85%" },
       }
     );
+
+    gsap.fromTo(
+      ".knowme-cta",
+      { y: 30, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1, ease: "power3.out",
+        scrollTrigger: { trigger: ".knowme-cta", start: "top 90%" },
+      }
+    );
   }, { scope: container });
 
   return (
@@ -227,6 +236,23 @@ export default function KnowMe() {
             art. That the future belongs to those who refuse to settle.
           </p>
         </div>
+      </div>
+
+      {/* CTA: Know more about me */}
+      <div className="knowme-cta mb-16 md:mb-20 opacity-0">
+        <a 
+          href="#about" 
+          className="group inline-flex items-center gap-4 text-xs md:text-sm uppercase tracking-[0.4em] font-bold text-text hover:text-accent transition-colors duration-300"
+        >
+          Know more about me
+          <span className="w-8 h-[1px] bg-text group-hover:bg-accent group-hover:w-12 transition-all duration-300" />
+          <svg 
+            viewBox="0 0 24 24" 
+            className="w-4 h-4 fill-none stroke-current stroke-2 -rotate-45 group-hover:rotate-0 transition-transform duration-300"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
       </div>
 
       {/* Stats Row */}
