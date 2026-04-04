@@ -15,6 +15,11 @@ import { useRef } from "react";
 export default function KnowMe() {
   const container = useRef<HTMLElement>(null);
   const headingBlock = useRef<HTMLDivElement>(null);
+  
+  // New Refs for the Detailed Who visual
+  const whoTextDetail = useRef<HTMLDivElement>(null);
+  const amiTextDetail = useRef<HTMLDivElement>(null);
+  const imageWrapperDetail = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     if (typeof window !== "undefined") {
@@ -143,6 +148,32 @@ export default function KnowMe() {
         scrollTrigger: { trigger: ".knowme-cta", start: "top 90%" },
       }
     );
+
+    // ═══════════════════════════════════════════
+    // 🎬 DETAILED "WHO AM I?" REVEAL (INLINE)
+    // ═══════════════════════════════════════════
+    const detailedTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".detailed-who-trigger",
+        start: "top 60%",
+        end: "bottom top", 
+        scrub: 1.5,
+      },
+    });
+
+    detailedTl.fromTo(whoTextDetail.current, 
+      { y: "-10vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
+      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1, ease: "power2.inOut" }
+    )
+    .fromTo(amiTextDetail.current, 
+      { y: "10vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
+      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1, ease: "power2.inOut" }, 0
+    )
+    .fromTo(imageWrapperDetail.current, 
+      { y: "20vh", opacity: 0, scale: 0.95, filter: "blur(4px) brightness(0.9) contrast(1.2)" },
+      { y: "0vh", opacity: 1, scale: 1, filter: "blur(0px) brightness(1.2) contrast(1.85)", duration: 1.5, ease: "power2.out" }, 0
+    );
+
   }, { scope: container });
 
   return (
@@ -275,6 +306,34 @@ export default function KnowMe() {
             </p>
           </div>
         ))}
+      </div>
+
+      {/* 🎬 DETAILED WHO AM I? VISUAL (ON-CLICK/SCROLL DEEP DIVE) */}
+      <div className="detailed-who-trigger relative w-full h-[60vh] md:h-screen mt-24 md:mt-32 overflow-hidden bg-background">
+        {/* Typography */}
+        <div ref={whoTextDetail} className="absolute top-[10%] left-[0%] z-0 pointer-events-none overflow-visible">
+          <h2 className="text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic">WHO</h2>
+        </div>
+
+        <div ref={amiTextDetail} className="absolute bottom-[10%] right-[0%] z-0 pointer-events-none overflow-visible">
+          <h2 className="text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic text-right whitespace-nowrap">AM&nbsp;&nbsp;I?</h2>
+        </div>
+
+        {/* Portrait */}
+        <div 
+          ref={imageWrapperDetail} 
+          className="absolute inset-0 w-full h-full flex items-center justify-center z-10 pointer-events-none"
+          style={{ 
+            maskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)", 
+            WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" 
+          }}
+        >
+          <img 
+            src="/images/aditya/ADI (2).png" 
+            alt="Aditya" 
+            className="w-full h-full object-contain grayscale opacity-85 contrast-[185%] brightness-[135%] mix-blend-multiply" 
+          />
+        </div>
       </div>
     </section>
   );
