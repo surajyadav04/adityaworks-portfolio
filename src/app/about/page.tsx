@@ -3,24 +3,32 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef, useLayoutEffect } from "react";
+import { useRef, useEffect } from "react";
 import ContactSection from "@/components/sections/ContactSection";
 
 export default function AboutPage() {
   const container = useRef<HTMLElement>(null);
-  const introTextWrapper = useRef<HTMLDivElement>(null);
   const whoText = useRef<HTMLDivElement>(null);
   const amiText = useRef<HTMLDivElement>(null);
   const imageWrapper = useRef<HTMLDivElement>(null);
   const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
 
-  // 🚀 Force scroll to top on page load
-  useLayoutEffect(() => {
+  // 🚀 FIXED: Robust Scroll Reset to Top on Page Load
+  useEffect(() => {
+    // Immediate scroll
     window.scrollTo(0, 0);
+    
+    // Delayed scroll just in case Lenis or ScrollTrigger are initializing
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }, 100);
+
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
+
+    return () => clearTimeout(timer);
   }, []);
 
   useGSAP(() => {
@@ -30,58 +38,56 @@ export default function AboutPage() {
     if (!container.current) return;
 
     // ═══════════════════════════════════════════
-    // 🎬 CINEMATIC INTRODUCTION (WHO AM I?)
+    // 🎬 CINEMATIC INTRODUCTION (SYNCED WITH HOME)
     // ═══════════════════════════════════════════
     const introTl = gsap.timeline({
       scrollTrigger: {
         trigger: container.current,
-        // Trigger start and end positions
         start: "top top",
-        end: "+=250%", 
+        end: "+=220%", 
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
       },
     });
 
-    // --- INITIAL STATE ---
-    // Combined single line state
-    gsap.set([whoText.current, amiText.current], { x: 0, y: 0, opacity: 1 });
-    gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
-    gsap.set(".signature-stroke", { strokeDashoffset: 1400, opacity: 0 });
+    // --- PHASE 1: CONVERGENCE (Match Home Page exactly) ---
+    introTl.fromTo(whoText.current, 
+      { y: "-15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
+      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1.2, ease: "power2.inOut" }
+    )
+    .fromTo(amiText.current, 
+      { y: "15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
+      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1.2, ease: "power2.inOut" }, 0
+    )
+    .fromTo(imageWrapper.current, 
+      { y: "35vh", opacity: 0, scale: 0.98, filter: "blur(4px) brightness(0.9) contrast(1.2)" },
+      { y: "0vh", opacity: 1, scale: 1, filter: "blur(0px) brightness(1.2) contrast(1.85)", duration: 1.5, ease: "power2.out" }, 0
+    );
 
-    // --- PHASE 1: PHOTO REVEAL ---
-    introTl.to(imageWrapper.current, { 
-      opacity: 1, 
-      scale: 1, 
-      filter: "blur(0px) brightness(1.2) contrast(1.85)", 
-      duration: 1.5, 
-      ease: "power2.out" 
-    }, 0.2);
+    // --- PHASE 2: EXIT (Who Am I? Splits apart) ---
+    introTl.to(whoText.current, { y: "-150vh", opacity: 0, duration: 1, ease: "power4.in" }, "+=0.3")
+           .to(amiText.current, { y: "150vh", opacity: 0, duration: 1, ease: "power4.in" }, "-=1");
 
-    // --- PHASE 2: CINEMATIC SPLIT (WHO UP, AM I DOWN) ---
-    introTl.to(whoText.current, { y: "-100vh", opacity: 0, duration: 2, ease: "power4.in" }, "+=0.3")
-           .to(amiText.current, { y: "100vh", opacity: 0, duration: 2, ease: "power4.in" }, "-=2");
-
-    // --- PHASE 3: THE SIGNATURE (ADITYA KUMAR - Handwriting) ---
+    // --- PHASE 3: THE SIGNATURE (Near Collar) ---
     introTl.fromTo(".signature-stroke", 
       { strokeDashoffset: 1400, opacity: 0 },
       { 
         strokeDashoffset: 0, 
         opacity: 1, 
-        duration: 4, 
+        duration: 3, 
         ease: "none", 
       }, "-=0.2"
     );
 
-    // Fill in the ink for the final "handwritten" feel
+    // Fade the Solid Ink Fill in
     introTl.to(".signature-stroke", { 
       fill: "#D14836", 
       duration: 1.2, 
       ease: "power2.in" 
-    }, "-=0.5");
+    }, "-=1.5");
 
-    // Exit phase for content transition
+    // Exit into the Content Section reveal
     introTl.to([imageWrapper.current, signatureWrapper.current], { 
       opacity: 0, 
       scale: 1.1, 
@@ -89,7 +95,7 @@ export default function AboutPage() {
       ease: "power2.inOut" 
     }, "+=0.5");
 
-    // 📖 CONTENT REVEAL
+    // 📖 CONTENT REVEAL (Section by Section)
     gsap.fromTo(".about-detail-block", 
       { y: 50, opacity: 0 },
       { 
@@ -116,26 +122,27 @@ export default function AboutPage() {
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography 1: WHO AM I? (Starts as single line) */}
-          <div ref={introTextWrapper} className="relative z-0 pointer-events-none w-full flex items-center justify-center">
-            <h1 className="text-[12vw] md:text-[14vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">
-              <span ref={whoText} className="inline-block">WHO&nbsp;AM&nbsp;</span>
-              <span ref={amiText} className="inline-block">I?</span>
-            </h1>
+          {/* Typography 1: WHO AM I? (Dual Div Style like Home Page) */}
+          <div ref={whoText} className="absolute top-[15%] left-[5%] z-0 pointer-events-none overflow-visible">
+            <h1 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">WHO</h1>
           </div>
 
-          {/* Typography 2: RAW SIGNATURE (Aditya Kumar) */}
-          <div ref={signatureWrapper} className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none px-4 w-full">
-            <svg className="w-full h-auto overflow-visible" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
+          <div ref={amiText} className="absolute bottom-[15%] right-[5%] z-0 pointer-events-none overflow-visible">
+            <h1 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">AM&nbsp;&nbsp;I?</h1>
+          </div>
+
+          {/* Typography 2: RAW SIGNATURE (Dropped to Collar Level) */}
+          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[12%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
+            <svg className="w-full h-auto overflow-visible max-w-5xl" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
-                x="50%" y="54%" 
+                x="50%" y="50%" 
                 dominantBaseline="middle" textAnchor="middle" 
-                className="signature-stroke font-caveat font-bold text-[18vw] md:text-[16vw] fill-transparent stroke-[#D14836] stroke-[3]"
+                className="signature-stroke font-caveat font-bold text-[18vw] md:text-[14vw] fill-transparent stroke-[#D14836] stroke-[3]"
                 style={{ 
                   strokeDasharray: 1400, strokeDashoffset: 1400, 
                   paintOrder: "stroke fill", 
                   letterSpacing: "-0.04em",
-                  transform: "rotate(-3deg) skewX(-6deg)"
+                  transform: "rotate(-3deg) skewX(-4deg)"
                 }}
               >
                 Aditya Kumar
