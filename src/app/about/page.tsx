@@ -8,8 +8,7 @@ import ContactSection from "@/components/sections/ContactSection";
 
 export default function AboutPage() {
   const container = useRef<HTMLElement>(null);
-  const whoText = useRef<HTMLSpanElement>(null);
-  const amiText = useRef<HTMLSpanElement>(null);
+  const whoAmIText = useRef<HTMLHeadingElement>(null);
   const imageWrapper = useRef<HTMLDivElement>(null);
   const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
@@ -36,40 +35,64 @@ export default function AboutPage() {
       scrollTrigger: {
         trigger: container.current,
         start: "top top",
-        end: "+=250%", 
+        end: "+=220%", 
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
       },
     });
 
-    // --- INITIAL STATE (Landing: One line, Visible) ---
-    gsap.set([whoText.current, amiText.current], { y: "0vh", opacity: 1 });
-    gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
-    gsap.set(".signature-stroke", { strokeDashoffset: 1400, opacity: 0 });
+    // --- PHASE 1: EXACT HOME PAGE STYLE ENTRY (Single Line Version) ---
+    introTl.fromTo(whoAmIText.current, 
+      { 
+        y: "20vh", 
+        opacity: 0, 
+        clipPath: "inset(100% 0 0 0)" 
+      },
+      { 
+        y: "0vh", 
+        opacity: 1, 
+        clipPath: "inset(0% 0 0% 0)", 
+        duration: 1.2, 
+        ease: "power2.inOut" 
+      }
+    )
+    .fromTo(imageWrapper.current, 
+      { 
+        y: "35vh", 
+        opacity: 0, 
+        scale: 0.98, 
+        filter: "blur(4px) brightness(0.9) contrast(1.2)" 
+      },
+      { 
+        y: "0vh", 
+        opacity: 1, 
+        scale: 1, 
+        filter: "blur(0px) brightness(1.2) contrast(1.85)", 
+        duration: 1.5, 
+        ease: "power2.out" 
+      }, 0 // Sync with text
+    );
 
-    // --- PHASE 1: THE REVEAL (Split Text + Reveal Photo) ---
-    introTl.to(whoText.current, { y: "-100vh", opacity: 0, duration: 1.5, ease: "power2.in" })
-           .to(amiText.current, { y: "100vh", opacity: 0, duration: 1.5, ease: "power2.in" }, "-=1.5")
-           .to(imageWrapper.current, { 
-             opacity: 1, 
-             scale: 1, 
-             filter: "blur(0px) brightness(1.2) contrast(1.85)", 
-             duration: 1.5, 
-             ease: "power2.out" 
-           }, "-=1");
+    // --- PHASE 2: EXIT TRANSITION ---
+    introTl.to(whoAmIText.current, { 
+      y: "-150vh", 
+      opacity: 0, 
+      duration: 1.2, 
+      ease: "power4.in" 
+    }, "+=0.2");
 
-    // --- PHASE 2: THE SIGNATURE (Near Collar) ---
+    // --- PHASE 3: THE SIGNATURE (Collar Level) ---
     introTl.fromTo(".signature-stroke", 
       { strokeDashoffset: 1400, opacity: 0 },
       { strokeDashoffset: 0, opacity: 1, duration: 3, ease: "none" }, 
-      "-=0.2"
+      "-=0.5"
     );
 
     // Ink filling
     introTl.to(".signature-stroke", { fill: "#D14836", duration: 1.2, ease: "power2.in" }, "-=1.5");
 
-    // Fade out for content
+    // Final Fade for Content
     introTl.to([imageWrapper.current, signatureWrapper.current], { 
       opacity: 0, 
       scale: 1.1, 
@@ -102,15 +125,14 @@ export default function AboutPage() {
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography 1: ONE-LINE LANDING */}
-          <div className="relative z-0 pointer-events-none w-full text-center">
-            <h1 className="text-[12vw] md:text-[14vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">
-              <span ref={whoText} className="inline-block">WHO&nbsp;AM&nbsp;</span>
-              <span ref={amiText} className="inline-block">I?</span>
+          {/* Typography 1: SINGLE-LINE (Style Synced with Home) */}
+          <div className="relative z-0 pointer-events-none w-full text-center px-4">
+            <h1 ref={whoAmIText} className="text-[14vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
+              WHO&nbsp;AM&nbsp;I?
             </h1>
           </div>
 
-          {/* Typography 2: SIGNATURE (Collar Level) */}
+          {/* Typography 2: RAW SIGNATURE (Collar Level) */}
           <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[12%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
             <svg className="w-full h-auto overflow-visible max-w-5xl" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
