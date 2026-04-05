@@ -6,22 +6,37 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useEffect } from "react";
 import ContactSection from "@/components/sections/ContactSection";
 
+/**
+ * REFINED ABOUT PAGE — VERTICAL SPLIT EDITION
+ * 
+ * Flow: 
+ * 1. Landing: "WHO AM I?" Centered in One Line.
+ * 2. Scroll: "WHO" (Up) / "AM I?" (Down) vertical split.
+ * 3. Reveal: Portrait + Signature (Lowered near collar/chest).
+ */
 export default function AboutPage() {
   const container = useRef<HTMLElement>(null);
-  const whoAmIText = useRef<HTMLHeadingElement>(null);
+  const whoPart = useRef<HTMLSpanElement>(null);
+  const amiPart = useRef<HTMLSpanElement>(null);
   const imageWrapper = useRef<HTMLDivElement>(null);
   const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
 
-  // 🚀 Robust Scroll Reset
+  // 🚀 AGGRESSIVE SCROLL RESET (Fix for land-in-middle issues)
   useEffect(() => {
+    // 1. Immediate reset
     window.scrollTo(0, 0);
+    
+    // 2. Delayed reset to combat Lenis/ScrollTrigger race conditions
     const timer = setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    }, 100);
+    }, 50);
+
+    // 3. Disable browser restoration
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -31,68 +46,59 @@ export default function AboutPage() {
     }
     if (!container.current) return;
 
+    // Timeline pinned for intro sequence
     const introTl = gsap.timeline({
       scrollTrigger: {
         trigger: container.current,
         start: "top top",
-        end: "+=220%", 
+        end: "+=250%", 
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
       },
     });
 
-    // --- PHASE 1: EXACT HOME PAGE STYLE ENTRY (Single Line Version) ---
-    introTl.fromTo(whoAmIText.current, 
-      { 
-        y: "20vh", 
-        opacity: 0, 
-        clipPath: "inset(100% 0 0 0)" 
-      },
-      { 
-        y: "0vh", 
-        opacity: 1, 
-        clipPath: "inset(0% 0 0% 0)", 
-        duration: 1.2, 
-        ease: "power2.inOut" 
-      }
-    )
-    .fromTo(imageWrapper.current, 
-      { 
-        y: "35vh", 
-        opacity: 0, 
-        scale: 0.98, 
-        filter: "blur(4px) brightness(0.9) contrast(1.2)" 
-      },
-      { 
-        y: "0vh", 
-        opacity: 1, 
-        scale: 1, 
-        filter: "blur(0px) brightness(1.2) contrast(1.85)", 
-        duration: 1.5, 
-        ease: "power2.out" 
-      }, 0 // Sync with text
-    );
+    // --- PHASE 1: INITIAL STATE ---
+    gsap.set([whoPart.current, amiPart.current], { yPercent: 0, opacity: 1 });
+    gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
+    gsap.set(".signature-stroke", { strokeDashoffset: 1400, opacity: 0 });
 
-    // --- PHASE 2: EXIT TRANSITION ---
-    introTl.to(whoAmIText.current, { 
-      y: "-150vh", 
+    // --- PHASE 2: VERTICAL SPLIT (WHO UP / AM I? DOWN) ---
+    introTl.to(whoPart.current, { 
+      yPercent: -150, 
       opacity: 0, 
-      duration: 1.2, 
-      ease: "power4.in" 
-    }, "+=0.2");
+      duration: 1.5, 
+      ease: "power2.in" 
+    })
+    .to(amiPart.current, { 
+      yPercent: 150, 
+      opacity: 0, 
+      duration: 1.5, 
+      ease: "power2.in" 
+    }, 0) // Sync split
+    .to(imageWrapper.current, { 
+      opacity: 1, 
+      scale: 1, 
+      filter: "blur(0px) brightness(1.2) contrast(1.85)", 
+      duration: 1.5, 
+      ease: "power2.out" 
+    }, "-=1");
 
-    // --- PHASE 3: THE SIGNATURE (Collar Level) ---
+    // --- PHASE 3: THE SIGNATURE (Lowered Placement) ---
     introTl.fromTo(".signature-stroke", 
       { strokeDashoffset: 1400, opacity: 0 },
       { strokeDashoffset: 0, opacity: 1, duration: 3, ease: "none" }, 
-      "-=0.5"
+      "-=0.2"
     );
 
     // Ink filling
-    introTl.to(".signature-stroke", { fill: "#D14836", duration: 1.2, ease: "power2.in" }, "-=1.5");
+    introTl.to(".signature-stroke", { 
+      fill: "#D14836", 
+      duration: 1.2, 
+      ease: "power2.in" 
+    }, "-=1.5");
 
-    // Final Fade for Content
+    // Exit into the Content Section reveal
     introTl.to([imageWrapper.current, signatureWrapper.current], { 
       opacity: 0, 
       scale: 1.1, 
@@ -113,6 +119,7 @@ export default function AboutPage() {
 
   return (
     <main className="relative bg-background min-h-screen">
+      {/* 🌫️ SIGNATURE INK FILTER */}
       <svg style={{ position: "absolute", width: 0, height: 0 }}>
         <defs>
           <filter id="about-signature-ink">
@@ -122,18 +129,20 @@ export default function AboutPage() {
         </defs>
       </svg>
 
+      {/* 🎬 HERO SECTION */}
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography 1: SINGLE-LINE (Style Synced with Home) */}
-          <div className="relative z-0 pointer-events-none w-full text-center px-4">
-            <h1 ref={whoAmIText} className="text-[14vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
-              WHO&nbsp;AM&nbsp;I?
+          {/* Typography 1: SINGLE-LINE LANDING WITH VERTICAL SPLIT */}
+          <div className="relative z-0 pointer-events-none w-full text-center px-4 overflow-visible">
+            <h1 className="text-[14vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
+              <span ref={whoPart} className="inline-block relative">WHO&nbsp;</span>
+              <span ref={amiPart} className="inline-block relative">AM&nbsp;I?</span>
             </h1>
           </div>
 
-          {/* Typography 2: RAW SIGNATURE (Collar Level) */}
-          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[12%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
+          {/* Typography 2: RAW SIGNATURE (Lowered to Chest/Collar Level) */}
+          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[6%] md:bottom-[8%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
             <svg className="w-full h-auto overflow-visible max-w-5xl" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
                 x="50%" y="50%" 
@@ -151,7 +160,7 @@ export default function AboutPage() {
             </svg>
           </div>
 
-          {/* Masked Portrait */}
+          {/* Portrait Mask */}
           <div 
             ref={imageWrapper} 
             className="absolute inset-0 w-full h-full flex items-center justify-center z-10 pointer-events-none opacity-0"
@@ -165,6 +174,7 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* 📖 CONTENT SECTION */}
       <section ref={contentSection} className="relative py-32 px-8 md:px-24 max-w-6xl mx-auto">
         <div className="about-detail-block mb-24">
           <h2 className="text-xs uppercase tracking-[0.4em] text-accent font-bold mb-8 italic">/ THE ARCHITECT OF EXPERIENCES</h2>
@@ -190,6 +200,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
       <ContactSection />
     </main>
   );
