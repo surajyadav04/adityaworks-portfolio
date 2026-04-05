@@ -139,19 +139,19 @@ export default function AboutPage() {
           
           {/* Typography 1: SPLIT HEADLINE */}
           <div className="relative z-0 pointer-events-none w-full text-center px-4 overflow-visible">
-            <h1 className="text-[14vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
+            <h1 className="text-[17vw] sm:text-[15vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
               <span ref={whoPart} className="inline-block relative">WHO&nbsp;</span>
               <span ref={amiPart} className="inline-block relative">AM&nbsp;I?</span>
             </h1>
           </div>
 
           {/* Typography 2: RAW SIGNATURE (Lowered Position) */}
-          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[4%] md:bottom-[5%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
-            <svg className="w-full h-auto overflow-visible max-w-4xl opacity-90" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
+          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[3%] sm:bottom-[4%] md:bottom-[5%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
+            <svg className="w-full h-auto overflow-visible max-w-[90vw] sm:max-w-4xl opacity-90" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
                 x="50%" y="50%" 
                 dominantBaseline="middle" textAnchor="middle" 
-                className="signature-stroke font-caveat font-bold text-[16vw] md:text-[12vw] fill-transparent stroke-[#B03B2B] stroke-[2.5]"
+                className="signature-stroke font-caveat font-bold text-[22vw] sm:text-[16vw] md:text-[12vw] fill-transparent stroke-[#B03B2B] stroke-[2.5]"
                 style={{ 
                   strokeDasharray: 1600, strokeDashoffset: 1600, 
                   paintOrder: "stroke fill", 

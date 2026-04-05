@@ -135,12 +135,12 @@ export default function WhoSection() {
       <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         
         {/* 🔴 TYPOGRAPHY (BEHIND - Z-0) */}
-        <div ref={whoText} className="absolute top-[15%] left-[0%] md:left-[2%] z-0 pointer-events-none overflow-visible">
-          <h2 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic">WHO</h2>
+        <div ref={whoText} className="absolute top-[15%] left-[2%] z-0 pointer-events-none overflow-visible">
+          <h2 className="text-[32vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic tracking-tighter">WHO</h2>
         </div>
 
-        <div ref={amiText} className="absolute bottom-[15%] right-[0%] md:right-[2%] z-0 pointer-events-none overflow-visible">
-          <h2 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic text-right whitespace-nowrap">AM&nbsp;&nbsp;I?</h2>
+        <div ref={amiText} className="absolute bottom-[15%] right-[2%] z-0 pointer-events-none overflow-visible">
+          <h2 className="text-[24vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic text-right whitespace-nowrap tracking-tighter">AM&nbsp;I?</h2>
         </div>
 
         {/* ✊ TYPOGRAPHY 2: INQUILAB BACKGROUND (TRUE STROKE REVEAL - Z-0) */}
@@ -149,7 +149,7 @@ export default function WhoSection() {
             <text 
               x="50%" y="50%" 
               dominantBaseline="middle" textAnchor="middle" 
-              className="inquilab-stroke font-kalam font-bold text-[20vw] md:text-[16vw] fill-transparent stroke-[#D14836] stroke-[4]"
+              className="inquilab-stroke font-kalam font-bold text-[28vw] md:text-[16vw] fill-transparent stroke-[#D14836] stroke-[4]"
               style={{ strokeDasharray: 1000, strokeDashoffset: 1000, paintOrder: "stroke fill" }}
             >
               इnquilab
@@ -158,17 +158,17 @@ export default function WhoSection() {
         </div>
 
         {/* 📝 QUOTES (MARGINAL STATEMENTS - Z-30) */}
-        <div ref={quoteText} className="absolute left-[4%] bottom-[10%] z-30 opacity-40 pointer-events-none max-w-[300px]">
-          <p className="font-bebas text-[3vw] md:text-[1.8vw] text-text leading-tight uppercase tracking-[0.2em]">
+        <div ref={quoteText} className="absolute left-[6%] bottom-[8%] z-30 opacity-40 pointer-events-none max-w-[200px] md:max-w-[300px]">
+          <p className="font-bebas text-[5vw] md:text-[1.8vw] text-text leading-tight uppercase tracking-[0.2em]">
             NOT A REVOLUTION,<br />JUST A QUIET REFUSAL<br />TO BE AVERAGE :)
           </p>
         </div>
 
-        <div ref={bhagatQuoteText} className="absolute right-[4%] top-[12%] z-30 opacity-40 pointer-events-none text-right max-w-[450px]">
-          <p className="font-bebas text-[2.5vw] md:text-[1.5vw] text-text leading-snug uppercase tracking-[0.1em] italic">
+        <div ref={bhagatQuoteText} className="absolute right-[6%] top-[10%] z-30 opacity-40 pointer-events-none text-right max-w-[300px] md:max-w-[450px]">
+          <p className="font-bebas text-[4vw] md:text-[1.5vw] text-text leading-snug uppercase tracking-[0.1em] italic">
             “The man should either begin to think himself a rival of God or he may begin to believe himself to be God.”
           </p>
-          <p className="font-bebas text-[1.5vw] md:text-[1vw] text-text/60 mt-2 tracking-widest uppercase">― Bhagat Singh, Why I am an Atheist</p>
+          <p className="font-bebas text-[2.5vw] md:text-[1vw] text-text/60 mt-2 tracking-widest uppercase">― Bhagat Singh</p>
         </div>
 
         {/* 🖼️ PORTRAIT (STICKY BACKGROUND - Z-10) */}
