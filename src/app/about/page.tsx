@@ -121,8 +121,13 @@ export default function AboutPage() {
               <text 
                 x="50%" y="54%" 
                 dominantBaseline="middle" textAnchor="middle" 
-                className="signature-stroke font-kalam font-bold text-[18vw] md:text-[14vw] fill-transparent stroke-[#D14836] stroke-[4]"
-                style={{ strokeDasharray: 1200, strokeDashoffset: 1200, paintOrder: "stroke fill", letterSpacing: "-0.05em" }}
+                className="signature-stroke font-kalam font-bold text-[20vw] md:text-[16vw] fill-transparent stroke-[#D14836] stroke-[4]"
+                style={{ 
+                  strokeDasharray: 1200, strokeDashoffset: 1200, 
+                  paintOrder: "stroke fill", 
+                  letterSpacing: "-0.08em",
+                  transform: "rotate(-4deg) skewX(-8deg)" // "Bad" handwriting unpolished look
+                }}
               >
                 Aditya Kumar
               </text>
