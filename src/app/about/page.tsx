@@ -8,26 +8,21 @@ import ContactSection from "@/components/sections/ContactSection";
 
 export default function AboutPage() {
   const container = useRef<HTMLElement>(null);
-  const whoText = useRef<HTMLDivElement>(null);
-  const amiText = useRef<HTMLDivElement>(null);
+  const whoText = useRef<HTMLSpanElement>(null);
+  const amiText = useRef<HTMLSpanElement>(null);
   const imageWrapper = useRef<HTMLDivElement>(null);
   const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
 
-  // 🚀 FIXED: Robust Scroll Reset to Top on Page Load
+  // 🚀 Robust Scroll Reset
   useEffect(() => {
-    // Immediate scroll
     window.scrollTo(0, 0);
-    
-    // Delayed scroll just in case Lenis or ScrollTrigger are initializing
     const timer = setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, 100);
-
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -37,65 +32,52 @@ export default function AboutPage() {
     }
     if (!container.current) return;
 
-    // ═══════════════════════════════════════════
-    // 🎬 CINEMATIC INTRODUCTION (SYNCED WITH HOME)
-    // ═══════════════════════════════════════════
     const introTl = gsap.timeline({
       scrollTrigger: {
         trigger: container.current,
         start: "top top",
-        end: "+=220%", 
+        end: "+=250%", 
         scrub: 1.5,
         pin: true,
         anticipatePin: 1,
       },
     });
 
-    // --- PHASE 1: CONVERGENCE (Match Home Page exactly) ---
-    introTl.fromTo(whoText.current, 
-      { y: "-15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
-      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1.2, ease: "power2.inOut" }
-    )
-    .fromTo(amiText.current, 
-      { y: "15vh", opacity: 0, clipPath: "inset(100% 0 0 0)" },
-      { y: "0vh", opacity: 1, clipPath: "inset(0% 0 0% 0)", duration: 1.2, ease: "power2.inOut" }, 0
-    )
-    .fromTo(imageWrapper.current, 
-      { y: "35vh", opacity: 0, scale: 0.98, filter: "blur(4px) brightness(0.9) contrast(1.2)" },
-      { y: "0vh", opacity: 1, scale: 1, filter: "blur(0px) brightness(1.2) contrast(1.85)", duration: 1.5, ease: "power2.out" }, 0
-    );
+    // --- INITIAL STATE (Landing: One line, Visible) ---
+    gsap.set([whoText.current, amiText.current], { y: "0vh", opacity: 1 });
+    gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
+    gsap.set(".signature-stroke", { strokeDashoffset: 1400, opacity: 0 });
 
-    // --- PHASE 2: EXIT (Who Am I? Splits apart) ---
-    introTl.to(whoText.current, { y: "-150vh", opacity: 0, duration: 1, ease: "power4.in" }, "+=0.3")
-           .to(amiText.current, { y: "150vh", opacity: 0, duration: 1, ease: "power4.in" }, "-=1");
+    // --- PHASE 1: THE REVEAL (Split Text + Reveal Photo) ---
+    introTl.to(whoText.current, { y: "-100vh", opacity: 0, duration: 1.5, ease: "power2.in" })
+           .to(amiText.current, { y: "100vh", opacity: 0, duration: 1.5, ease: "power2.in" }, "-=1.5")
+           .to(imageWrapper.current, { 
+             opacity: 1, 
+             scale: 1, 
+             filter: "blur(0px) brightness(1.2) contrast(1.85)", 
+             duration: 1.5, 
+             ease: "power2.out" 
+           }, "-=1");
 
-    // --- PHASE 3: THE SIGNATURE (Near Collar) ---
+    // --- PHASE 2: THE SIGNATURE (Near Collar) ---
     introTl.fromTo(".signature-stroke", 
       { strokeDashoffset: 1400, opacity: 0 },
-      { 
-        strokeDashoffset: 0, 
-        opacity: 1, 
-        duration: 3, 
-        ease: "none", 
-      }, "-=0.2"
+      { strokeDashoffset: 0, opacity: 1, duration: 3, ease: "none" }, 
+      "-=0.2"
     );
 
-    // Fade the Solid Ink Fill in
-    introTl.to(".signature-stroke", { 
-      fill: "#D14836", 
-      duration: 1.2, 
-      ease: "power2.in" 
-    }, "-=1.5");
+    // Ink filling
+    introTl.to(".signature-stroke", { fill: "#D14836", duration: 1.2, ease: "power2.in" }, "-=1.5");
 
-    // Exit into the Content Section reveal
+    // Fade out for content
     introTl.to([imageWrapper.current, signatureWrapper.current], { 
       opacity: 0, 
       scale: 1.1, 
       duration: 1.5, 
       ease: "power2.inOut" 
-    }, "+=0.5");
+    }, "+=0.3");
 
-    // 📖 CONTENT REVEAL (Section by Section)
+    // 📖 CONTENT REVEAL
     gsap.fromTo(".about-detail-block", 
       { y: 50, opacity: 0 },
       { 
@@ -108,7 +90,6 @@ export default function AboutPage() {
 
   return (
     <main className="relative bg-background min-h-screen">
-      {/* 🌫️ SIGNATURE INK FILTER */}
       <svg style={{ position: "absolute", width: 0, height: 0 }}>
         <defs>
           <filter id="about-signature-ink">
@@ -118,20 +99,18 @@ export default function AboutPage() {
         </defs>
       </svg>
 
-      {/* 🎬 HERO SECTION */}
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography 1: WHO AM I? (Dual Div Style like Home Page) */}
-          <div ref={whoText} className="absolute top-[15%] left-[5%] z-0 pointer-events-none overflow-visible">
-            <h1 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">WHO</h1>
+          {/* Typography 1: ONE-LINE LANDING */}
+          <div className="relative z-0 pointer-events-none w-full text-center">
+            <h1 className="text-[12vw] md:text-[14vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">
+              <span ref={whoText} className="inline-block">WHO&nbsp;AM&nbsp;</span>
+              <span ref={amiText} className="inline-block">I?</span>
+            </h1>
           </div>
 
-          <div ref={amiText} className="absolute bottom-[15%] right-[5%] z-0 pointer-events-none overflow-visible">
-            <h1 className="text-[25vw] md:text-[20vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap">AM&nbsp;&nbsp;I?</h1>
-          </div>
-
-          {/* Typography 2: RAW SIGNATURE (Dropped to Collar Level) */}
+          {/* Typography 2: SIGNATURE (Collar Level) */}
           <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[12%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
             <svg className="w-full h-auto overflow-visible max-w-5xl" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
@@ -150,7 +129,7 @@ export default function AboutPage() {
             </svg>
           </div>
 
-          {/* Portrait Mask */}
+          {/* Masked Portrait */}
           <div 
             ref={imageWrapper} 
             className="absolute inset-0 w-full h-full flex items-center justify-center z-10 pointer-events-none opacity-0"
@@ -159,29 +138,18 @@ export default function AboutPage() {
               WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" 
             }}
           >
-            <img 
-              src="/images/aditya/ADI (2).png" 
-              alt="Aditya" 
-              className="w-full h-full object-contain grayscale contrast-[185%] brightness-[135%] mix-blend-multiply" 
-            />
+            <img src="/images/aditya/ADI (2).png" alt="Aditya" className="w-full h-full object-contain grayscale contrast-[185%] brightness-[135%] mix-blend-multiply" />
           </div>
         </div>
       </section>
 
-      {/* 📖 CONTENT SECTION */}
       <section ref={contentSection} className="relative py-32 px-8 md:px-24 max-w-6xl mx-auto">
         <div className="about-detail-block mb-24">
           <h2 className="text-xs uppercase tracking-[0.4em] text-accent font-bold mb-8 italic">/ THE ARCHITECT OF EXPERIENCES</h2>
-          <p className="text-section-title leading-tight mb-12">
-            I build digital monuments that <span className="text-text-light underline decoration-accent/30">breathe.</span>
-          </p>
+          <p className="text-section-title leading-tight mb-12">I build digital monuments that <span className="text-text-light underline decoration-accent/30">breathe.</span></p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-            <p className="text-body text-text-light leading-relaxed">
-              My journey began at the intersection of structure and soul—Architecture. It taught me that space is not just physical; it is emotional. When I transitioned into the digital realm, I brought that same philosophy with me. I don&apos;t just code websites; I architect environments.
-            </p>
-            <p className="text-body text-text-light leading-relaxed">
-              As a Senior Creative Developer, I specialize in crafting experience-driven narratives through motion, high-performance code, and relentless attention to detail. Every project is a manifesto—a refusal to accept the average.
-            </p>
+            <p className="text-body text-text-light leading-relaxed">My journey began at the intersection of structure and soul—Architecture. It taught me that space is not just physical; it is emotional. When I transitioned into the digital realm, I brought that same philosophy with me. I don&apos;t just code websites; I architect environments.</p>
+            <p className="text-body text-text-light leading-relaxed">As a Senior Creative Developer, I specialize in crafting experience-driven narratives through motion, high-performance code, and relentless attention to detail. Every project is a manifesto—a refusal to accept the average.</p>
           </div>
         </div>
 
@@ -199,15 +167,7 @@ export default function AboutPage() {
             <p className="text-sm text-text-light leading-relaxed">Constantly exploring the boundaries of the web, ensuring that every experience I build is ready for the high-end landscape of tomorrow.</p>
           </div>
         </div>
-
-        <div className="about-detail-block mt-32 text-center border-t border-text/5 pt-24">
-          <p className="text-body text-text-light italic max-w-2xl mx-auto px-4">
-            &ldquo;This is where we begin. We will add more details here as the journey continues.&rdquo;
-          </p>
-        </div>
       </section>
-
-      {/* Footer Connectivity */}
       <ContactSection />
     </main>
   );
