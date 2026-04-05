@@ -7,12 +7,12 @@ import { useRef, useEffect } from "react";
 import ContactSection from "@/components/sections/ContactSection";
 
 /**
- * REFINED ABOUT PAGE — VERTICAL SPLIT EDITION
+ * REFINED ABOUT PAGE — SNAPPY CINEMATIC EDITION
  * 
- * Flow: 
- * 1. Landing: "WHO AM I?" Centered in One Line.
- * 2. Scroll: "WHO" (Up) / "AM I?" (Down) vertical split.
- * 3. Reveal: Portrait + Signature (Lowered near collar/chest).
+ * Refinements:
+ * 1. Reduced scroll distance (no void space).
+ * 2. Signature lowered and made more organic.
+ * 3. Smooth scroll focus.
  */
 export default function AboutPage() {
   const container = useRef<HTMLElement>(null);
@@ -22,21 +22,15 @@ export default function AboutPage() {
   const signatureWrapper = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
 
-  // 🚀 AGGRESSIVE SCROLL RESET (Fix for land-in-middle issues)
+  // 🚀 FAST SCROLL RESET
   useEffect(() => {
-    // 1. Immediate reset
     window.scrollTo(0, 0);
-    
-    // 2. Delayed reset to combat Lenis/ScrollTrigger race conditions
     const timer = setTimeout(() => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }, 50);
-
-    // 3. Disable browser restoration
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -46,13 +40,13 @@ export default function AboutPage() {
     }
     if (!container.current) return;
 
-    // Timeline pinned for intro sequence
+    // 🎬 Snappier Intro (Reduced 'end' value to remove void space)
     const introTl = gsap.timeline({
       scrollTrigger: {
         trigger: container.current,
         start: "top top",
-        end: "+=250%", 
-        scrub: 1.5,
+        end: "+=160%", // Tighter scroll for better momentum
+        scrub: 1.2,
         pin: true,
         anticipatePin: 1,
       },
@@ -61,57 +55,67 @@ export default function AboutPage() {
     // --- PHASE 1: INITIAL STATE ---
     gsap.set([whoPart.current, amiPart.current], { yPercent: 0, opacity: 1 });
     gsap.set(imageWrapper.current, { opacity: 0, scale: 0.95 });
-    gsap.set(".signature-stroke", { strokeDashoffset: 1400, opacity: 0 });
+    gsap.set(".signature-stroke", { strokeDashoffset: 1600, opacity: 0 });
 
-    // --- PHASE 2: VERTICAL SPLIT (WHO UP / AM I? DOWN) ---
+    // --- PHASE 2: VERTICAL SPLIT (SNAPPIER) ---
     introTl.to(whoPart.current, { 
       yPercent: -150, 
       opacity: 0, 
-      duration: 1.5, 
-      ease: "power2.in" 
+      duration: 1.2, 
+      ease: "power2.inOut" 
     })
     .to(amiPart.current, { 
       yPercent: 150, 
       opacity: 0, 
-      duration: 1.5, 
-      ease: "power2.in" 
-    }, 0) // Sync split
+      duration: 1.2, 
+      ease: "power2.inOut" 
+    }, 0)
     .to(imageWrapper.current, { 
       opacity: 1, 
       scale: 1, 
-      filter: "blur(0px) brightness(1.2) contrast(1.85)", 
-      duration: 1.5, 
+      filter: "blur(0px) brightness(1.1) contrast(1.7)", 
+      duration: 1.2, 
       ease: "power2.out" 
-    }, "-=1");
+    }, "-=0.8");
 
-    // --- PHASE 3: THE SIGNATURE (Lowered Placement) ---
+    // --- PHASE 3: AUTHENTIC SIGNATURE (Lower & Slower Write) ---
     introTl.fromTo(".signature-stroke", 
-      { strokeDashoffset: 1400, opacity: 0 },
-      { strokeDashoffset: 0, opacity: 1, duration: 3, ease: "none" }, 
-      "-=0.2"
+      { strokeDashoffset: 1600, opacity: 0 },
+      { 
+        strokeDashoffset: 0, 
+        opacity: 1, 
+        duration: 3.5, 
+        ease: "power1.inOut" // More natural pen motion
+      }, 
+      "-=0.4"
     );
 
-    // Ink filling
+    // Ink filling (Deeper Red)
     introTl.to(".signature-stroke", { 
-      fill: "#D14836", 
-      duration: 1.2, 
+      fill: "#B03B2B", 
+      duration: 1.5, 
       ease: "power2.in" 
-    }, "-=1.5");
+    }, "-=2");
 
-    // Exit into the Content Section reveal
+    // Exit into Content
     introTl.to([imageWrapper.current, signatureWrapper.current], { 
       opacity: 0, 
-      scale: 1.1, 
-      duration: 1.5, 
+      scale: 1.05, 
+      filter: "blur(10px)",
+      duration: 1.2, 
       ease: "power2.inOut" 
-    }, "+=0.3");
+    }, "+=0.2");
 
-    // 📖 CONTENT REVEAL
+    // 📖 SNAPPY CONTENT REVEAL
     gsap.fromTo(".about-detail-block", 
-      { y: 50, opacity: 0 },
+      { y: 60, opacity: 0 },
       { 
-        y: 0, opacity: 1, duration: 1.2, stagger: 0.4, ease: "power3.out",
-        scrollTrigger: { trigger: contentSection.current, start: "top 80%" }
+        y: 0, opacity: 1, duration: 1, stagger: 0.3, ease: "power2.out",
+        scrollTrigger: { 
+          trigger: contentSection.current, 
+          start: "top 85%",
+          scrub: false // Make it pop rather than drag
+        }
       }
     );
 
@@ -119,12 +123,12 @@ export default function AboutPage() {
 
   return (
     <main className="relative bg-background min-h-screen">
-      {/* 🌫️ SIGNATURE INK FILTER */}
+      {/* 🌫️ HANDWRITTEN INK FILTER */}
       <svg style={{ position: "absolute", width: 0, height: 0 }}>
         <defs>
           <filter id="about-signature-ink">
-            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
           </filter>
         </defs>
       </svg>
@@ -133,7 +137,7 @@ export default function AboutPage() {
       <section ref={container} className="relative w-full h-screen overflow-hidden">
         <div className="relative w-full h-full flex items-center justify-center">
           
-          {/* Typography 1: SINGLE-LINE LANDING WITH VERTICAL SPLIT */}
+          {/* Typography 1: SPLIT HEADLINE */}
           <div className="relative z-0 pointer-events-none w-full text-center px-4 overflow-visible">
             <h1 className="text-[14vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible">
               <span ref={whoPart} className="inline-block relative">WHO&nbsp;</span>
@@ -141,18 +145,18 @@ export default function AboutPage() {
             </h1>
           </div>
 
-          {/* Typography 2: RAW SIGNATURE (Lowered to Chest/Collar Level) */}
-          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[6%] md:bottom-[8%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
-            <svg className="w-full h-auto overflow-visible max-w-5xl" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
+          {/* Typography 2: RAW SIGNATURE (Lowered Position) */}
+          <div ref={signatureWrapper} className="absolute inset-x-0 bottom-[4%] md:bottom-[5%] flex items-center justify-center z-30 pointer-events-none px-4 w-full">
+            <svg className="w-full h-auto overflow-visible max-w-4xl opacity-90" viewBox="0 0 1200 400" style={{ filter: "url(#about-signature-ink)" }}>
               <text 
                 x="50%" y="50%" 
                 dominantBaseline="middle" textAnchor="middle" 
-                className="signature-stroke font-caveat font-bold text-[18vw] md:text-[14vw] fill-transparent stroke-[#D14836] stroke-[3]"
+                className="signature-stroke font-caveat font-bold text-[16vw] md:text-[12vw] fill-transparent stroke-[#B03B2B] stroke-[2.5]"
                 style={{ 
-                  strokeDasharray: 1400, strokeDashoffset: 1400, 
+                  strokeDasharray: 1600, strokeDashoffset: 1600, 
                   paintOrder: "stroke fill", 
                   letterSpacing: "-0.04em",
-                  transform: "rotate(-3deg) skewX(-4deg)"
+                  transform: "rotate(-2deg) skewX(-2deg)"
                 }}
               >
                 Aditya Kumar
@@ -169,34 +173,34 @@ export default function AboutPage() {
               WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" 
             }}
           >
-            <img src="/images/aditya/ADI (2).png" alt="Aditya" className="w-full h-full object-contain grayscale contrast-[185%] brightness-[135%] mix-blend-multiply" />
+            <img src="/images/aditya/ADI (2).png" alt="Aditya" className="w-full h-full object-contain grayscale contrast-[170%] brightness-[125%] mix-blend-multiply" />
           </div>
         </div>
       </section>
 
       {/* 📖 CONTENT SECTION */}
-      <section ref={contentSection} className="relative py-32 px-8 md:px-24 max-w-6xl mx-auto">
+      <section ref={contentSection} className="relative py-24 px-8 md:px-24 max-w-6xl mx-auto">
         <div className="about-detail-block mb-24">
           <h2 className="text-xs uppercase tracking-[0.4em] text-accent font-bold mb-8 italic">/ THE ARCHITECT OF EXPERIENCES</h2>
           <p className="text-section-title leading-tight mb-12">I build digital monuments that <span className="text-text-light underline decoration-accent/30">breathe.</span></p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-            <p className="text-body text-text-light leading-relaxed">My journey began at the intersection of structure and soul—Architecture. It taught me that space is not just physical; it is emotional. When I transitioned into the digital realm, I brought that same philosophy with me. I don&apos;t just code websites; I architect environments.</p>
-            <p className="text-body text-text-light leading-relaxed">As a Senior Creative Developer, I specialize in crafting experience-driven narratives through motion, high-performance code, and relentless attention to detail. Every project is a manifesto—a refusal to accept the average.</p>
+            <p className="text-body text-text-light leading-relaxed opacity-90">My journey began at the intersection of structure and soul—Architecture. It taught me that space is not just physical; it is emotional. When I transitioned into the digital realm, I brought that same philosophy with me. I don&apos;t just code websites; I architect environments.</p>
+            <p className="text-body text-text-light leading-relaxed opacity-90">As a Senior Creative Developer, I specialize in crafting experience-driven narratives through motion, high-performance code, and relentless attention to detail. Every project is a manifesto—a refusal to accept the average.</p>
           </div>
         </div>
 
         <div className="about-detail-block grid grid-cols-1 md:grid-cols-3 gap-12 py-24 border-t border-text/10">
           <div>
             <h3 className="font-bebas text-3xl text-accent mb-4 tracking-wider uppercase">01 / VISION</h3>
-            <p className="text-sm text-text-light leading-relaxed">To bridge the gap between technological precision and human emotion, creating digital interactions that feel organic yet engineered.</p>
+            <p className="text-sm text-text-light leading-relaxed opacity-80">To bridge the gap between technological precision and human emotion, creating digital interactions that feel organic yet engineered.</p>
           </div>
           <div>
             <h3 className="font-bebas text-3xl text-accent mb-4 tracking-wider uppercase">02 / CRAFT</h3>
-            <p className="text-sm text-text-light leading-relaxed">Relentless pursuit of perfection in motion, performance, and storytelling. Pixel perfection is not a goal; it&apos;s the baseline.</p>
+            <p className="text-sm text-text-light leading-relaxed opacity-80">Relentless pursuit of perfection in motion, performance, and storytelling. Pixel perfection is not a goal; it&apos;s the baseline.</p>
           </div>
           <div>
             <h3 className="font-bebas text-3xl text-accent mb-4 tracking-wider uppercase">03 / FUTURE</h3>
-            <p className="text-sm text-text-light leading-relaxed">Constantly exploring the boundaries of the web, ensuring that every experience I build is ready for the high-end landscape of tomorrow.</p>
+            <p className="text-sm text-text-light leading-relaxed opacity-80">Constantly exploring the boundaries of the web, ensuring that every experience I build is ready for the high-end landscape of tomorrow.</p>
           </div>
         </div>
       </section>
