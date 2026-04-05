@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Bebas_Neue, Rozha_One, Kalam } from "next/font/google";
+import { Inter, Bebas_Neue, Rozha_One, Kalam, Caveat } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/components/LenisProvider";
 import CustomCursor from "@/components/CustomCursor";
@@ -27,6 +27,11 @@ const kalam = Kalam({
   weight: "700",
   variable: "--font-kalam",
   subsets: ["latin", "devanagari"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
 });
 
 const baseUrl = "https://www.adityaworks.online";
@@ -91,7 +96,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable} ${rozha.variable} ${kalam.variable} antialiased scroll-smooth`}>
+    <html lang="en" className={`${inter.variable} ${bebas.variable} ${rozha.variable} ${kalam.variable} ${caveat.variable} antialiased scroll-smooth`}>
 
       <body className="bg-background text-text selection:bg-accent selection:text-white overflow-x-hidden">
         <LenisProvider>
