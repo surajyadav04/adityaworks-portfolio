@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Hero from "@/components/sections/Hero";
 import WhoSection from "@/components/sections/WhoSection";
 import KnowMe from "@/components/sections/KnowMe";
@@ -9,32 +10,35 @@ import WorkSection from "@/components/sections/WorkSection";
 import ContactSection from "@/components/sections/ContactSection";
 import { useViewContext } from "@/context/ViewContext";
 
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 /**
- * PORTFOLIO HOME — CINEMATIC MODE SWITCHER (GLOBAL SYNC)
+ * PORTFOLIO HOME — CINEMATIC MODE SWITCHER (FIXED)
  * 
- * Logic:
- * 1. Consumes 'viewMode' from ViewContext (linked to Navbar).
- * 2. On change: Triggers the high-end fade out / slide up transition.
+ * Fixes:
+ * 1. Single-rendering all sections to prevent GSAP selector conflicts.
+ * 2. ScrollTrigger.refresh() on mode toggle to fix "invisible works".
  */
 export default function Home() {
   const { viewMode } = useViewContext();
-  const profileRef = useRef<HTMLDivElement>(null);
-  const workRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
+  const workContainerRef = useRef<HTMLDivElement>(null);
   const isInitialRender = useRef(true);
 
   // 🎬 THE CINEMATIC TRANSITION (Triggered by Global State)
   useEffect(() => {
-    // Skip animation on first render to prevent "flashing" the wrong mode
+    // Initial Setup (No animation)
     if (isInitialRender.current) {
       isInitialRender.current = false;
       
-      // Ensure correct initial visibility based on default PROFILE mode
-      if (viewMode === "PROFILE") {
-        gsap.set(workRef.current, { display: "none", opacity: 0 });
-        gsap.set(profileRef.current, { display: "block", opacity: 1, y: 0 });
+      if (viewMode === "WORK") {
+        gsap.set(introRef.current, { display: "none", opacity: 0 });
+        gsap.set(workContainerRef.current, { y: 0, opacity: 1 });
       } else {
-        gsap.set(profileRef.current, { display: "none", opacity: 0 });
-        gsap.set(workRef.current, { display: "block", opacity: 1, y: 0 });
+        gsap.set(introRef.current, { display: "block", opacity: 1 });
       }
       return;
     }
@@ -47,67 +51,52 @@ export default function Home() {
     });
 
     if (viewMode === "WORK") {
-      // 🛫 EXIT PROFILE
-      tl.to(profileRef.current, {
+      // 🛫 EXIT INTRO (PROFILE SECTIONS)
+      tl.to(introRef.current, {
         opacity: 0,
         y: -40,
         duration: 0.6,
         ease: "power2.inOut",
         onComplete: () => {
-          gsap.set(profileRef.current, { display: "none" });
+          gsap.set(introRef.current, { display: "none" });
+          // REFRESH SCROLLTRIGGER AFTER LAYOUT CHANGE
+          ScrollTrigger.refresh();
         }
       })
-      // 🛬 ENTER WORK
-      .set(workRef.current, { display: "block", opacity: 0, y: 40 })
-      .to(workRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        delay: 0.1,
-        ease: "power2.out"
-      });
+      // 🛬 REVEAL WORK
+      .fromTo(workContainerRef.current, 
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" }
+      );
     } else {
-      // 🛫 EXIT WORK
-      tl.to(workRef.current, {
-        opacity: 0,
-        y: -40,
-        duration: 0.6,
-        ease: "power2.inOut",
-        onComplete: () => {
-          gsap.set(workRef.current, { display: "none" });
-        }
-      })
-      // 🛬 ENTER PROFILE
-      .set(profileRef.current, { display: "block", opacity: 0, y: 40 })
-      .to(profileRef.current, {
+      // 🛫 EXIT WORK MODE (Show Intro Again)
+      tl.set(introRef.current, { display: "block", opacity: 0, y: 40 })
+      .to(introRef.current, {
         opacity: 1,
         y: 0,
         duration: 0.7,
-        delay: 0.1,
-        ease: "power2.out"
+        ease: "power2.out",
+        onComplete: () => {
+          // REFRESH SCROLLTRIGGER AFTER LAYOUT CHANGE
+          ScrollTrigger.refresh();
+        }
       });
     }
   }, [viewMode]);
 
   return (
     <main className="relative bg-background min-h-screen">
-      {/* Navbar handled globally in layout.tsx */}
-      
-      {/* 🖼️ PROFILE VIEW (DEFAULT) */}
-      <div ref={profileRef} className="view-container">
+      {/* 🖼️ PROFILE INTRO (Hero, Who, KnowMe) */}
+      <div ref={introRef} className="view-container">
         <Hero />
         <WhoSection />
         <KnowMe />
-        <WorkSection />
-        <ContactSection />
       </div>
 
-      {/* 🛠️ WORK VIEW (ONLY SELECTED PROJECTS & CONTACT) */}
-      <div ref={workRef} className="view-container">
-        <div className="pt-24 min-h-screen">
-          <WorkSection />
-          <ContactSection />
-        </div>
+      {/* 🛠️ WORK & CONTACT (Rendered only ONCE) */}
+      <div ref={workContainerRef} className={`view-container ${viewMode === 'WORK' ? 'pt-24' : ''}`}>
+        <WorkSection />
+        <ContactSection />
       </div>
     </main>
   );
