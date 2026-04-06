@@ -2,8 +2,9 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { PROJECTS } from "@/data/projects";
 
 /**
@@ -17,6 +18,7 @@ export default function WorkSection() {
   const router = useRouter();
 
   useGSAP(() => {
+    // Entrance Animation
     gsap.from(".project-card", {
       scrollTrigger: {
         trigger: container.current,
@@ -27,6 +29,20 @@ export default function WorkSection() {
       duration: 1.5,
       stagger: 0.3,
       ease: "power4.out"
+    });
+
+    // Hover Animation Setup
+    const cards = gsap.utils.toArray(".project-card");
+    cards.forEach((card: any) => {
+      const img = card.querySelector("img");
+      const overlay = card.querySelector(".hover-overlay");
+      
+      const tl = gsap.timeline({ paused: true });
+      tl.to(img, { scale: 1.03, brightness: 1.1, duration: 0.6, ease: "power2.out" })
+        .to(overlay, { opacity: 1, duration: 0.4 }, 0);
+
+      card.addEventListener("mouseenter", () => tl.play());
+      card.addEventListener("mouseleave", () => tl.reverse());
     });
   }, { scope: container });
 
@@ -48,37 +64,62 @@ export default function WorkSection() {
   return (
     <section id="work" ref={container} className="py-10 px-8 md:px-24 bg-background">
       <div className="flex justify-between items-baseline mb-16">
-        <h2 className="text-section-title">Selected<br />Works</h2>
+        <div className="flex flex-col">
+          <h2 className="text-section-title leading-tight">Selected<br />Works</h2>
+          <span className="text-[10px] uppercase tracking-[0.4em] text-accent font-bold mt-4 italic">/ Case Studies</span>
+        </div>
         <span className="text-xs uppercase tracking-widest text-text-light font-medium italic">/ 04 projects</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
         {PROJECTS.map((project, index) => (
           <div 
             key={index} 
             className="project-card group cursor-pointer relative"
             onClick={() => handleProjectClick(project.title)}
           >
-            <div className="relative aspect-[4/5] bg-text/5 overflow-hidden mb-6">
-              {/* placeholder for project image */}
-              <div className="absolute inset-0 bg-text/10 group-hover:bg-primary/20 transition-colors duration-700" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                <span className="text-sm uppercase tracking-widest text-text font-bold">View Case Study</span>
+            <div className="relative aspect-[4/5] bg-text/5 overflow-hidden mb-8 border border-text/5">
+              {/* Project Preview Image */}
+              <Image 
+                src={project.previewImage} 
+                alt={project.title}
+                fill
+                className="object-cover transition-transform duration-700 brightness-[0.9]"
+              />
+              
+              {/* Hover Overlay */}
+              <div className="hover-overlay absolute inset-0 bg-primary/10 opacity-0 flex items-center justify-center pointer-events-none transition-opacity duration-500">
+                <span className="text-sm uppercase tracking-widest text-text font-bold px-6 py-3 bg-background/80 backdrop-blur-sm border border-text/10">View Case Study</span>
               </div>
+
+              {/* Concept Project Label */}
+              {project.isConcept && (
+                <div className="absolute bottom-4 right-4 px-3 py-1 bg-background/90 backdrop-blur-md text-[8px] uppercase tracking-[0.3em] font-bold text-text-light border border-text/10 mix-blend-difference">
+                  Concept Project
+                </div>
+              )}
             </div>
             
-            <h3 className="text-3xl font-bold tracking-tighter text-text group-hover:text-accent transition-colors duration-500">
-              {project.title}
-            </h3>
-            
-            {/* Project Short Description */}
-            <p className="text-sm text-text-light font-light mt-2 line-clamp-2 transition-colors duration-500 group-hover:text-text">
-              {project.description}
-            </p>
+            <div className="flex justify-between items-start">
+              <div className="max-w-[80%]">
+                <h3 className="text-3xl font-bold tracking-tighter text-text group-hover:text-accent transition-colors duration-500">
+                  {project.title}
+                </h3>
+                {/* Project Short Description */}
+                <p className="text-sm text-text-light font-light mt-3 line-clamp-2 transition-colors duration-500 group-hover:text-text">
+                  {project.description}
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-text-light opacity-50 pt-2">{project.year}</span>
+            </div>
 
-            <div className="flex justify-between items-center mt-6 border-t border-text/10 pt-4">
-              <span className="text-xs uppercase tracking-[0.2em] text-text-light">{project.category}</span>
-              <span className="text-xs font-mono text-text-light opacity-50">{project.year}</span>
+            <div className="flex items-center gap-4 mt-6 border-t border-text/10 pt-4">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-text-light bg-text/5 px-2 py-0.5">{project.category}</span>
+              <div className="flex gap-2">
+                {project.techStack.slice(0, 2).map(tech => (
+                  <span key={tech} className="text-[8px] uppercase tracking-widest text-text/30 font-bold">• {tech}</span>
+                ))}
+              </div>
             </div>
           </div>
         ))}
