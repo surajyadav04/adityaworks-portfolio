@@ -3,35 +3,14 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
-import Link from "next/link";
+import { PROJECTS } from "@/data/projects";
 
-const PROJECTS = [
-  {
-    title: "Vanguard",
-    category: "Brand Identity / Web",
-    year: "2024",
-    link: "#"
-  },
-  {
-    title: "Elysium",
-    category: "Product Design",
-    year: "2024",
-    link: "#"
-  },
-  {
-    title: "Synthesis",
-    category: "Motion Systems",
-    year: "2023",
-    link: "#"
-  },
-  {
-    title: "Origin",
-    category: "Creative Coding",
-    year: "2023",
-    link: "#"
-  }
-];
-
+/**
+ * WORK SECTION — SELECTED PROJECTS
+ * 
+ * Powered by centralized data in src/data/projects.ts
+ * Design rules: Minimal, cinematic grid, asymmetrical layout flow.
+ */
 export default function WorkSection() {
   const container = useRef(null);
 
