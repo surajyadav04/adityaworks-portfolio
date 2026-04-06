@@ -1,32 +1,43 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import Hero from "@/components/sections/Hero";
 import WhoSection from "@/components/sections/WhoSection";
 import KnowMe from "@/components/sections/KnowMe";
 import WorkSection from "@/components/sections/WorkSection";
 import ContactSection from "@/components/sections/ContactSection";
-import ViewToggle from "@/components/ViewToggle";
+import { useViewContext } from "@/context/ViewContext";
 
 /**
- * PORTFOLIO HOME — CINEMATIC MODE SWITCHER
+ * PORTFOLIO HOME — CINEMATIC MODE SWITCHER (GLOBAL SYNC)
  * 
- * Flow:
- * 1. Default Mode: PROFILE (All sections).
- * 2. Toggle to WORK: Smoothly scrolls to top, then fades out PROFILE 
- *    with a -40px upward slide, followed by WORK fading in with 
- *    a +40px upward slide.
+ * Logic:
+ * 1. Consumes 'viewMode' from ViewContext (linked to Navbar).
+ * 2. On change: Triggers the high-end fade out / slide up transition.
  */
 export default function Home() {
-  const [viewMode, setViewMode] = useState<"PROFILE" | "WORK">("PROFILE");
+  const { viewMode } = useViewContext();
   const profileRef = useRef<HTMLDivElement>(null);
   const workRef = useRef<HTMLDivElement>(null);
+  const isInitialRender = useRef(true);
 
-  // 🎬 THE CINEMATIC TRANSITION
-  const handleToggle = (newMode: "PROFILE" | "WORK") => {
-    if (newMode === viewMode) return;
+  // 🎬 THE CINEMATIC TRANSITION (Triggered by Global State)
+  useEffect(() => {
+    // Skip animation on first render to prevent "flashing" the wrong mode
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      
+      // Ensure correct initial visibility based on default PROFILE mode
+      if (viewMode === "PROFILE") {
+        gsap.set(workRef.current, { display: "none", opacity: 0 });
+        gsap.set(profileRef.current, { display: "block", opacity: 1, y: 0 });
+      } else {
+        gsap.set(profileRef.current, { display: "none", opacity: 0 });
+        gsap.set(workRef.current, { display: "block", opacity: 1, y: 0 });
+      }
+      return;
+    }
 
     const tl = gsap.timeline({
       onStart: () => {
@@ -35,7 +46,7 @@ export default function Home() {
       }
     });
 
-    if (newMode === "WORK") {
+    if (viewMode === "WORK") {
       // 🛫 EXIT PROFILE
       tl.to(profileRef.current, {
         opacity: 0,
@@ -53,10 +64,7 @@ export default function Home() {
         y: 0,
         duration: 0.7,
         delay: 0.1,
-        ease: "power2.out",
-        onComplete: () => {
-          setViewMode("WORK");
-        }
+        ease: "power2.out"
       });
     } else {
       // 🛫 EXIT WORK
@@ -76,27 +84,15 @@ export default function Home() {
         y: 0,
         duration: 0.7,
         delay: 0.1,
-        ease: "power2.out",
-        onComplete: () => {
-          setViewMode("PROFILE");
-        }
+        ease: "power2.out"
       });
     }
-  };
-
-  // Initial State Setup
-  useEffect(() => {
-    if (viewMode === "PROFILE") {
-      gsap.set(workRef.current, { display: "none", opacity: 0 });
-    } else {
-      gsap.set(profileRef.current, { display: "none", opacity: 0 });
-    }
-  }, []);
+  }, [viewMode]);
 
   return (
     <main className="relative bg-background min-h-screen">
-      <ViewToggle currentMode={viewMode} onToggle={handleToggle} />
-
+      {/* Navbar handled globally in layout.tsx */}
+      
       {/* 🖼️ PROFILE VIEW (DEFAULT) */}
       <div ref={profileRef} className="view-container">
         <Hero />

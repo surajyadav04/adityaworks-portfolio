@@ -5,6 +5,7 @@ import LenisProvider from "@/components/LenisProvider";
 import CustomCursor from "@/components/CustomCursor";
 import Navbar from "@/components/Navbar";
 import StructuredData from "@/components/StructuredData";
+import { ViewProvider } from "@/context/ViewContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -99,17 +100,17 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${bebas.variable} ${rozha.variable} ${kalam.variable} ${caveat.variable} antialiased scroll-smooth`}>
 
       <body className="bg-background text-text selection:bg-accent selection:text-white overflow-x-hidden">
-        <LenisProvider>
-          <div className="grain min-h-screen flex flex-col">
-            <StructuredData />
-            <CustomCursor />
-            <Navbar />
-            {children}
-          </div>
-        </LenisProvider>
+        <ViewProvider>
+          <LenisProvider>
+            <div className="grain min-h-screen flex flex-col">
+              <StructuredData />
+              <CustomCursor />
+              <Navbar />
+              {children}
+            </div>
+          </LenisProvider>
+        </ViewProvider>
       </body>
     </html>
   );
 }
-
-
