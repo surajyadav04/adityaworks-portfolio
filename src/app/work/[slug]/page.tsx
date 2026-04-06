@@ -25,30 +25,44 @@ export default function ProjectShowcase() {
     (p) => p.title.toLowerCase().replace(/\s+/g, "-") === slug
   );
 
+  // Sync mode with global context (ensures Navbar highlights 'Work')
+  useEffect(() => {
+    if (project) setMode("WORK");
+  }, [project, setMode]);
+
   // GSAP Entrance
   useGSAP(() => {
     if (!project) return;
 
+    // Reset container state for entrance
+    gsap.set(container.current, { opacity: 0, y: 20 });
+
     const tl = gsap.timeline();
     
-    tl.from(".reveal-text", {
-      y: 50,
-      opacity: 0,
-      duration: 1,
-      stagger: 0.1,
-      ease: "power4.out"
+    tl.to(container.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      ease: "power2.out"
     })
+    .from(".reveal-text", {
+      y: 20,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: "power3.out"
+    }, "-=0.4")
     .from(".reveal-visual", {
       opacity: 0,
-      y: 30,
+      y: 20,
       duration: 1,
-      ease: "power3.out"
+      ease: "power2.out"
     }, "-=0.6")
     .from(".reveal-cta", {
       opacity: 0,
-      x: -20,
+      x: -10,
       duration: 0.8,
-      stagger: 0.2,
+      stagger: 0.1,
       ease: "power2.out"
     }, "-=0.4");
   }, { scope: container, dependencies: [project] });
@@ -70,8 +84,17 @@ export default function ProjectShowcase() {
   }
 
   const handleBack = () => {
-    setMode("WORK");
-    router.push("/");
+    // Cinematic Exit Animation (Project -> Homepage)
+    gsap.to(container.current, {
+      opacity: 0,
+      y: 20,
+      duration: 0.5,
+      ease: "power2.inOut",
+      onComplete: () => {
+        setMode("WORK");
+        router.push("/");
+      }
+    });
   };
 
   return (

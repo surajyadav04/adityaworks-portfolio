@@ -3,6 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { PROJECTS } from "@/data/projects";
 
 /**
@@ -13,6 +14,7 @@ import { PROJECTS } from "@/data/projects";
  */
 export default function WorkSection() {
   const container = useRef(null);
+  const router = useRouter();
 
   useGSAP(() => {
     gsap.from(".project-card", {
@@ -28,6 +30,21 @@ export default function WorkSection() {
     });
   }, { scope: container });
 
+  const handleProjectClick = (projectTitle: string) => {
+    const slug = projectTitle.toLowerCase().replace(/\s+/g, '-');
+    
+    // Cinematic Exit Animation (Homepage -> Project)
+    gsap.to(container.current, {
+      opacity: 0,
+      y: -20,
+      duration: 0.5,
+      ease: "power2.inOut",
+      onComplete: () => {
+        router.push(`/work/${slug}`);
+      }
+    });
+  };
+
   return (
     <section id="work" ref={container} className="py-10 px-8 md:px-24 bg-background">
       <div className="flex justify-between items-baseline mb-16">
@@ -40,11 +57,7 @@ export default function WorkSection() {
           <div 
             key={index} 
             className="project-card group cursor-pointer relative"
-            onClick={() => {
-              // Internal trigger for showcase view (to be implemented next)
-              const slug = project.title.toLowerCase().replace(/\s+/g, '-');
-              window.location.href = `/work/${slug}`;
-            }}
+            onClick={() => handleProjectClick(project.title)}
           >
             <div className="relative aspect-[4/5] bg-text/5 overflow-hidden mb-6">
               {/* placeholder for project image */}
