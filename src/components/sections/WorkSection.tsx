@@ -37,7 +37,15 @@ export default function WorkSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
         {PROJECTS.map((project, index) => (
-          <div key={index} className="project-card group cursor-pointer">
+          <div 
+            key={index} 
+            className="project-card group cursor-pointer relative"
+            onClick={() => {
+              // Internal trigger for showcase view (to be implemented next)
+              const slug = project.title.toLowerCase().replace(/\s+/g, '-');
+              window.location.href = `/work/${slug}`;
+            }}
+          >
             <div className="relative aspect-[4/5] bg-text/5 overflow-hidden mb-6">
               {/* placeholder for project image */}
               <div className="absolute inset-0 bg-text/10 group-hover:bg-primary/20 transition-colors duration-700" />
@@ -49,7 +57,13 @@ export default function WorkSection() {
             <h3 className="text-3xl font-bold tracking-tighter text-text group-hover:text-accent transition-colors duration-500">
               {project.title}
             </h3>
-            <div className="flex justify-between items-center mt-2 border-t border-text/10 pt-4">
+            
+            {/* Project Short Description */}
+            <p className="text-sm text-text-light font-light mt-2 line-clamp-2 transition-colors duration-500 group-hover:text-text">
+              {project.description}
+            </p>
+
+            <div className="flex justify-between items-center mt-6 border-t border-text/10 pt-4">
               <span className="text-xs uppercase tracking-[0.2em] text-text-light">{project.category}</span>
               <span className="text-xs font-mono text-text-light opacity-50">{project.year}</span>
             </div>
