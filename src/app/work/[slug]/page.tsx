@@ -182,6 +182,22 @@ export default function ProjectShowcase() {
           </div>
         </aside>
       </div>
+
+      {/* Bottom Navigation Callback */}
+      <footer className="mt-32 pt-16 border-t border-text/10 flex flex-col items-center">
+        <span className="text-[10px] uppercase tracking-[0.4em] text-text-light mb-6 opacity-50">End of Case Study</span>
+        <button 
+          onClick={handleBack}
+          className="reveal-text group flex flex-col items-center gap-4 transition-all"
+        >
+          <span className="text-display text-4xl md:text-6xl hover:text-accent transition-colors">
+            Back to Work
+          </span>
+          <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-accent opacity-0 group-hover:opacity-100 transition-opacity">
+            Return to Grid
+          </span>
+        </button>
+      </footer>
     </main>
   );
 }
