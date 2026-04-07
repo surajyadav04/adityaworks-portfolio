@@ -30,7 +30,7 @@ export interface Project {
     what: string;
     why: string;
     how: string;
-    visual: string;
+    visual: string | string[];
     codeSnippet?: string;
   }[];
   weirdBanner?: {
@@ -83,7 +83,7 @@ export const PROJECTS: Project[] = [
       {
         id: "climate-switch",
         title: "Atmospheric Climate Switch",
-        visual: "/projects/tikona_snow_state_1775579405567.png",
+        visual: ["/projects/climate-rain.png", "/projects/climate-snow.png"],
         what: "A dynamic weather-based UI transformation engine that reacts to the narrative context.",
         why: "To simulate the visceral reality of travel—where the atmosphere dictates the emotional tone of a place.",
         how: "Implemented using an overlay state system. GSAP handles the transition of particle instances, while CSS variables update the scene's color grading.",
@@ -100,7 +100,7 @@ function updateAtmosphere(state) {
       {
         id: "scroll-experience",
         title: "Cinematic Scroll Experience",
-        visual: "/projects/hero_dune_title_1775579212870.png",
+        visual: "/projects/scroll-experience.png",
         what: "A non-linear storytelling approach where scrolling drives the camera through 3D scenes instead of just moving down a page.",
         why: "Cinematic pacing ensures the user absorbs the narrative at a deliberate, human-centric speed.",
         how: "Built on Lenis for smooth momentum-based scrolling, synced with GSAP ScrollTrigger to map scroll progress to WebGL camera coordinates.",
@@ -114,7 +114,7 @@ gsap.to(camera.position, {
       {
         id: "coordinates-system",
         title: "Traveler & Spatial Coordinates",
-        visual: "/projects/travelers_gallery_1775579436852.png",
+        visual: "/projects/coordinates.png",
         what: "A data-driven labeling system that anchors every traveler and story to precise global coordinates.",
         why: "Authenticity. It transforms the digital experience into a verified account of a physical journey.",
         how: "Mapping the 'Dispatch' ID to specific Latitude/Longitude coordinates (e.g., 18.6° N, 73.5° E) rendered through a stylized monospaced UI layer."

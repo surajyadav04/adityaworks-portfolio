@@ -186,13 +186,32 @@ export default function ProjectShowcase() {
           {/* Deep-Dive Case Study Sections */}
           {project.deepSections.map((section, idx) => (
             <section key={section.id} className="reveal-text pt-32 border-t border-text/5 first:border-0 first:pt-0">
-              <div className="mb-16 relative aspect-video overflow-hidden border border-text/10 bg-text/5">
-                <Image 
-                  src={section.visual} 
-                  alt={section.title} 
-                  fill 
-                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                />
+              <div className="mb-16 relative overflow-hidden">
+                {Array.isArray(section.visual) ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {section.visual.map((v, i) => (
+                      <div key={i} className="relative aspect-video border border-text/10 bg-text/5 overflow-hidden">
+                        <Image 
+                          src={v} 
+                          alt={`${section.title} state ${i + 1}`} 
+                          fill 
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="relative aspect-video overflow-hidden border border-text/10 bg-text/5">
+                    <Image 
+                      src={section.visual} 
+                      alt={section.title} 
+                      fill 
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
+                      className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="max-w-[65ch]">
