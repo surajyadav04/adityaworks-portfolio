@@ -171,7 +171,27 @@ gsap.to(camera.position, {
         ]
       }
     },
-    deepSections: []
+    deepSections: [
+      {
+        id: "module-architecture",
+        title: "Modular Interface Architecture",
+        visual: "/projects/elysium.png",
+        what: "A nested system of adaptive modules that reorganize themselves based on the user's current task priority.",
+        why: "To prevent information overload in high-density SaaS environments.",
+        how: "Built using dynamic grid systems and React-based layout containers that respond to real-time performance metrics.",
+        codeSnippet: `const LayoutManager = ({ modules }) => {
+  return modules.sort((a,b) => b.priority - a.priority).map(M => <M.Container />);
+}`
+      },
+      {
+        id: "glass-depth",
+        title: "Glassmorphic Depth Logic",
+        visual: "/projects/elysium.png",
+        what: "A multi-layered transparency system using backdrop filters to create a distinct hierarchy of data.",
+        why: "It provides a clear visual signal for focus without losing the context of the underlying system state.",
+        how: "Using CSS backdrop-filter: blur(20px) combined with subtle 1px border highlights to define layer boundaries."
+      }
+    ]
   },
   {
     title: "Synthesis",
@@ -203,11 +223,23 @@ gsap.to(camera.position, {
       },
       palette: {
         colors: [
-          { name: "Industrial Charcoal", hex: "#121212", usage: "Background", intent: "Low-distraction base for motion." }
+          { name: "Industrial Charcoal", hex: "#121212", usage: "Background", intent: "Low-distraction base for motion." },
+          { name: "Glow Green", hex: "#00FFC2", usage: "Motion Trails", intent: "Primary signifier of technical activity." }
         ]
       }
     },
-    deepSections: []
+    deepSections: [
+      {
+        id: "kinetic-identity",
+        title: "Kinetic Identity Framework",
+        visual: "/projects/synthesis.png",
+        what: "A standardized set of motion easing and timing rules that ensure every interaction feels like it belongs to the same system.",
+        why: "Consistency in motion is as important as consistency in color for enterprise brand trust.",
+        how: "Developed a custom GSAP plugin that wraps complex physics calculations into simple, reusable hooks.",
+        codeSnippet: `const { animateIn } = useSynthesis();
+animateIn('.chart-card', { variant: 'fluid', duration: 0.8 });`
+      }
+    ]
   },
   {
     title: "Origin",
@@ -239,10 +271,25 @@ gsap.to(camera.position, {
       },
       palette: {
         colors: [
-          { name: "Molten Amber", hex: "#FFBF00", usage: "Primary Glow", intent: "Organic light sources." }
+          { name: "Molten Amber", hex: "#FFBF00", usage: "Primary Glow", intent: "Organic light sources." },
+          { name: "Deep Shadow", hex: "#000000", usage: "Background", intent: "Total void for maximum contrast." }
         ]
       }
     },
-    deepSections: []
+    deepSections: [
+      {
+        id: "shader-physics",
+        title: "GLSL Shader Physics",
+        visual: "/projects/origin.png",
+        what: "Procedural displacement of geometry using custom vertex shaders that calculate perlin noise on the GPU.",
+        why: "To achieve complex, organic movement at 60fps without burdening the CPU.",
+        how: "Written in GLSL using 4D Simplex noise functions, allowing for non-repeating, time-based morphing of 3D meshes.",
+        codeSnippet: `void main() {
+  vec3 pos = position;
+  pos.y += snoise(vec4(pos * 0.1, uTime));
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+}`
+      }
+    ]
   }
 ];
