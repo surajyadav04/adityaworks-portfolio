@@ -183,22 +183,57 @@ export default function ProjectShowcase() {
             </div>
           </section>
 
-          {/* Interactions Deep-Dive */}
-          <section className="reveal-text pt-24">
-            <h2 className="text-[10px] uppercase tracking-[0.4em] text-accent font-black mb-12">Interaction Highlights</h2>
-            <div className="space-y-16">
-              {project.interactions.map((interaction, i) => (
-                <div key={i} className="group">
-                  <h3 className="text-2xl font-bold tracking-tight mb-4 group-hover:text-accent transition-colors">
-                    {interaction.title}
-                  </h3>
-                  <p className="text-text/70 leading-relaxed max-w-[50ch]">
-                    {interaction.description}
-                  </p>
+          {/* Deep-Dive Case Study Sections */}
+          {project.deepSections.map((section, idx) => (
+            <section key={section.id} className="reveal-text pt-32 border-t border-text/5 first:border-0 first:pt-0">
+              <div className="mb-16 relative aspect-video overflow-hidden border border-text/10 bg-text/5">
+                <Image 
+                  src={section.visual} 
+                  alt={section.title} 
+                  fill 
+                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                />
+              </div>
+
+              <div className="max-w-[65ch]">
+                <div className="flex items-center gap-4 mb-8">
+                   <span className="text-[10px] font-mono opacity-30">0{idx + 1}</span>
+                   <h2 className="text-[10px] uppercase tracking-[0.4em] text-accent font-black">{section.title}</h2>
                 </div>
-              ))}
-            </div>
-          </section>
+
+                <div className="space-y-12">
+                  <div>
+                    <h3 className="text-[9px] uppercase tracking-widest text-text-light font-bold mb-4 opacity-40 italic underline decoration-accent/30 underline-offset-4">What it does</h3>
+                    <p className="text-2xl md:text-3xl font-medium leading-tight">
+                      {section.what}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                      <h3 className="text-[9px] uppercase tracking-widest text-text-light font-bold mb-4 opacity-40">Why it exists</h3>
+                      <p className="text-sm text-text/70 leading-relaxed">
+                        {section.why}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-[9px] uppercase tracking-widest text-text-light font-bold mb-4 opacity-40">How it works</h3>
+                      <p className="text-sm text-text/70 leading-relaxed">
+                        {section.how}
+                      </p>
+                    </div>
+                  </div>
+
+                  {section.codeSnippet && (
+                    <div className="mt-12 bg-text text-background p-8 font-mono text-[11px] leading-relaxed relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 px-3 py-1 bg-accent/20 text-accent text-[8px] uppercase tracking-widest">Code Snippet</div>
+                      <pre className="whitespace-pre-wrap">{section.codeSnippet}</pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          ))}
         </div>
 
         {/* Right: Design DNA (Sticky) */}
@@ -209,28 +244,39 @@ export default function ProjectShowcase() {
             </h2>
             
             <div className="mb-12">
-              <h3 className="text-[9px] uppercase tracking-widest text-accent font-bold mb-3">Typography</h3>
-              <p className="text-xl font-bold mb-2 tracking-tight">{project.designDetails.typography.name}</p>
-              <p className="text-xs text-text/60 leading-relaxed font-light italic">
-                {project.designDetails.typography.reasoning}
-              </p>
-            </div>
-
-            <div className="mb-12">
-              <h3 className="text-[9px] uppercase tracking-widest text-accent font-bold mb-4">Color Palette</h3>
-              <div className="flex gap-2 mb-6">
-                {project.designDetails.palette.colors.map(color => (
-                  <div 
-                    key={color} 
-                    className="w-10 h-10 border border-text/10" 
-                    style={{ backgroundColor: color }}
-                    title={color}
-                  />
+              <h3 className="text-[9px] uppercase tracking-widest text-accent font-bold mb-6">Typography System</h3>
+              <div className="space-y-6">
+                {project.designDetails.typography.fonts.map((f, i) => (
+                  <div key={i} className="border-l border-text/10 pl-4 py-1">
+                    <p className="text-lg font-bold tracking-tight mb-1">{f.name}</p>
+                    <p className="text-[8px] uppercase tracking-widest text-text-light font-black mb-1 opacity-60">Role: {f.role}</p>
+                    <p className="text-[10px] text-text/60 leading-relaxed font-light italic">
+                      {f.usage}
+                    </p>
+                  </div>
                 ))}
               </div>
-              <p className="text-xs text-text/60 leading-relaxed font-light italic">
-                {project.designDetails.palette.intent}
-              </p>
+            </div>
+
+            <div className="mb-12 pt-8 border-t border-text/10">
+              <h3 className="text-[9px] uppercase tracking-widest text-accent font-bold mb-6">Color Palette</h3>
+              <div className="space-y-6">
+                {project.designDetails.palette.colors.map((color, i) => (
+                  <div key={i} className="flex gap-4 items-start">
+                    <div 
+                      className="w-12 h-12 border border-text/10 shrink-0" 
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    <div>
+                      <p className="text-[10px] font-mono font-bold mb-1 tracking-widest">{color.hex}</p>
+                      <p className="text-[8px] uppercase tracking-widest text-text-light font-black mb-1 opacity-60">{color.name}</p>
+                      <p className="text-[10px] text-text/60 leading-relaxed font-light italic">
+                        {color.intent}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="pt-8 border-t border-text/10 flex flex-col gap-4">
@@ -267,7 +313,15 @@ export default function ProjectShowcase() {
             <h2 className="text-display text-5xl md:text-7xl leading-none">{project.weirdBanner.title}</h2>
             <div className="flex-1 h-px bg-text/10" />
           </div>
-          <p className="text-text-light text-sm italic mb-16 max-w-[60ch]">
+          <div className="flex flex-wrap gap-x-12 gap-y-6 mb-16">
+            {project.weirdBanner.translations.map((t, i) => (
+              <div key={i} className="flex flex-col">
+                <span className="text-[8px] uppercase tracking-widest text-accent font-black mb-1">{t.language}</span>
+                <span className="text-2xl font-bold tracking-tighter opacity-80">{t.text}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-text-light text-sm italic mb-16 max-w-[60ch] leading-relaxed">
             {project.weirdBanner.meaning}
           </p>
           

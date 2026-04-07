@@ -18,19 +18,25 @@ export interface Project {
     typography: {
       name: string;
       reasoning: string;
+      fonts: { name: string; role: string; usage: string }[];
     };
     palette: {
-      colors: string[];
-      intent: string;
+      colors: { name: string; hex: string; usage: string; intent: string }[];
     };
   };
-  interactions: {
+  deepSections: {
+    id: string;
     title: string;
-    description: string;
+    what: string;
+    why: string;
+    how: string;
+    visual: string;
+    codeSnippet?: string;
   }[];
   weirdBanner?: {
     title: string;
     meaning: string;
+    translations: { language: string; text: string }[];
     terms: { term: string; definition: string }[];
   };
 }
@@ -57,27 +63,71 @@ export const PROJECTS: Project[] = [
     },
     designDetails: {
       typography: {
-        name: "Rozha One",
-        reasoning: "Chosen for its editorial and timeless storytelling feel, balancing heritage with modern aesthetics."
+        name: "Rozha One & Dune",
+        reasoning: "A balance between high-contrast editorial elegance and raw, characterful cinematic wordmarks.",
+        fonts: [
+          { name: "Dune", role: "Hero Title", usage: "Main project headings and titles for maximum cinematic impact." },
+          { name: "Rozha One", role: "Editorial body", usage: "Narrative sections and quotes to maintain a heritage storytelling feel." },
+          { name: "Inter", role: "UI / Technical", usage: "Navigation, labels, and technical data points for high legibility." }
+        ]
       },
       palette: {
-        colors: ["#F5F5DC", "#FF4500", "#1A1A1A"],
-        intent: "A parchment-inspired primary base reflecting old maps, accented by high-contrast reds for urgency."
+        colors: [
+          { name: "Backdrop", hex: "#F4F1EA", usage: "Background", intent: "Parchment-inspired tone reflecting historical travel logs." },
+          { name: "Base", hex: "#1A1A1A", usage: "Primary Text", intent: "Deep charcoal for high-contrast, professional readability." },
+          { name: "Accent", hex: "#C04028", usage: "Highlights / UI", intent: "A vibrant, earthy red signaling interactive depth and urgency." }
+        ]
       }
     },
-    interactions: [
+    deepSections: [
       {
-        title: "Climate Switch",
-        description: "An atmospheric toggle that shifts the entire site's visual and auditory 'weather'—from dust to rain—to match the traveler's inner state."
+        id: "climate-switch",
+        title: "Atmospheric Climate Switch",
+        visual: "/projects/tikona_snow_state_1775579405567.png",
+        what: "A dynamic weather-based UI transformation engine that reacts to the narrative context.",
+        why: "To simulate the visceral reality of travel—where the atmosphere dictates the emotional tone of a place.",
+        how: "Implemented using an overlay state system. GSAP handles the transition of particle instances, while CSS variables update the scene's color grading.",
+        codeSnippet: `// Partial implementation of the Climate Toggle logic
+function updateAtmosphere(state) {
+  gsap.to(atmosphereRef.current, {
+    opacity: state === 'rain' ? 1 : 0,
+    duration: 1.2,
+    ease: "power2.inOut"
+  });
+  document.documentElement.className = state;
+}`
       },
       {
-        title: "Cinematic Scroll",
-        description: "A non-linear storytelling approach where scrolling drives the camera through 3D scenes instead of just moving down a page."
+        id: "scroll-experience",
+        title: "Cinematic Scroll Experience",
+        visual: "/projects/hero_dune_title_1775579212870.png",
+        what: "A non-linear storytelling approach where scrolling drives the camera through 3D scenes instead of just moving down a page.",
+        why: "Cinematic pacing ensures the user absorbs the narrative at a deliberate, human-centric speed.",
+        how: "Built on Lenis for smooth momentum-based scrolling, synced with GSAP ScrollTrigger to map scroll progress to WebGL camera coordinates.",
+        codeSnippet: `const lenis = new Lenis({ lerp: 0.1 });
+lenis.on('scroll', ScrollTrigger.update);
+gsap.to(camera.position, {
+  z: -50,
+  scrollTrigger: { scrub: true }
+});`
+      },
+      {
+        id: "coordinates-system",
+        title: "Traveler & Spatial Coordinates",
+        visual: "/projects/travelers_gallery_1775579436852.png",
+        what: "A data-driven labeling system that anchors every traveler and story to precise global coordinates.",
+        why: "Authenticity. It transforms the digital experience into a verified account of a physical journey.",
+        how: "Mapping the 'Dispatch' ID to specific Latitude/Longitude coordinates (e.g., 18.6° N, 73.5° E) rendered through a stylized monospaced UI layer."
       }
     ],
     weirdBanner: {
       title: "The Weird Terms",
       meaning: "Travel terms that capture the 'weird' and wonderful essence of the journey.",
+      translations: [
+        { language: "English", text: "Weird Wanderer" },
+        { language: "Hindi", text: "Ajeeb Musafir" },
+        { language: "Urdu", text: "Ajeeb Musafir (عجیب مسافر)" }
+      ],
       terms: [
         { term: "Jugaad", definition: "A flexible approach to problem-solving that uses limited resources in an innovative way." },
         { term: "Safar", definition: "A journey that isn't just about reaching a place, but about how the path changes the traveler." },
@@ -108,23 +158,20 @@ export const PROJECTS: Project[] = [
     designDetails: {
       typography: {
         name: "Inter & Outfit",
-        reasoning: "Selected for their extreme legibility and mathematical precision in complex data scenarios."
+        reasoning: "Selected for their extreme legibility and mathematical precision in complex data scenarios.",
+        fonts: [
+          { name: "Outfit", role: "Display", usage: "Headings for a modern, geometric look." },
+          { name: "Inter", role: "Body", usage: "Clean application UI for maximum readability." }
+        ]
       },
       palette: {
-        colors: ["#0A0A0A", "#00BFFF", "#BF00FF"],
-        intent: "A 'deep space' dark mode base with neon 'electric' highlights to indicate high-priority interactive zones."
+        colors: [
+          { name: "Deep Space", hex: "#0A0A0A", usage: "Background", intent: "A focus-first dark mode base." },
+          { name: "Electric Cyan", hex: "#00BFFF", usage: "Highlight", intent: "Digital vibrancy indicating action." }
+        ]
       }
     },
-    interactions: [
-      {
-        title: "Glassmorphic Depth",
-        description: "Using layered transparency and back-drop blurs to create a sense of hierarchical depth in flat interfaces."
-      },
-      {
-        title: "Adaptive Tokens",
-        description: "Real-time color grading of the UI based on the specific data module being viewed."
-      }
-    ]
+    deepSections: []
   },
   {
     title: "Synthesis",
@@ -149,23 +196,18 @@ export const PROJECTS: Project[] = [
     designDetails: {
       typography: {
         name: "JetBrains Mono",
-        reasoning: "Utilized for its technical, developer-centric aesthetic that mirrors the library's focus on logic."
+        reasoning: "Utilized for its technical, developer-centric aesthetic that mirrors the library's focus on logic.",
+        fonts: [
+          { name: "JetBrains Mono", role: "Technical UI", usage: "Code blocks and documentation tags." }
+        ]
       },
       palette: {
-        colors: ["#121212", "#00FFC2", "#FF0055"],
-        intent: "Industrial charcoal tones designed to recede, allowing glowing motion trails to take center stage."
+        colors: [
+          { name: "Industrial Charcoal", hex: "#121212", usage: "Background", intent: "Low-distraction base for motion." }
+        ]
       }
     },
-    interactions: [
-      {
-        title: "Kinetic Parallax",
-        description: "A multi-layered scroll system where background data points move in logarithmic relation to the user's velocity."
-      },
-      {
-        title: "Dynamic Stream Mapping",
-        description: "Visualizing real-time websocket data as fluid particle flows instead of static charts."
-      }
-    ]
+    deepSections: []
   },
   {
     title: "Origin",
@@ -190,22 +232,17 @@ export const PROJECTS: Project[] = [
     designDetails: {
       typography: {
         name: "Bebas Neue",
-        reasoning: "A bold, structural choice used for high-impact labels in the generative void."
+        reasoning: "A bold, structural choice used for high-impact labels in the generative void.",
+        fonts: [
+          { name: "Bebas Neue", role: "Decorative Labels", usage: "Large scale structural signage." }
+        ]
       },
       palette: {
-        colors: ["#000000", "#FFBF00", "#CC5500"],
-        intent: "Warm, amber gradients emerging from deep shadows, inspired by fire and organic molten states."
+        colors: [
+          { name: "Molten Amber", hex: "#FFBF00", usage: "Primary Glow", intent: "Organic light sources." }
+        ]
       }
     },
-    interactions: [
-      {
-        title: "Noise Displacement",
-        description: "Reactive environments that morph and shift based on the frequency of the surrounding audio input."
-      },
-      {
-        title: "Procedural Growth",
-        description: "Geometric clusters that 'grow' and branch out infinitely as the user navigates the 3D space."
-      }
-    ]
+    deepSections: []
   }
 ];
