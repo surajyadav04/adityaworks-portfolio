@@ -97,9 +97,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${bebas.variable} ${rozha.variable} ${kalam.variable} ${caveat.variable} antialiased scroll-smooth`}>
-
-      <body className="bg-background text-text selection:bg-accent selection:text-white overflow-x-hidden">
+    <html 
+      lang="en" 
+      className={`${inter.variable} ${bebas.variable} ${rozha.variable} ${kalam.variable} ${caveat.variable} antialiased scroll-smooth`}
+      suppressHydrationWarning
+    >
+      <body 
+        className="bg-background text-text selection:bg-accent selection:text-white overflow-x-hidden"
+        suppressHydrationWarning
+      >
         <ViewProvider>
           <LenisProvider>
             <div className="grain min-h-screen flex flex-col">

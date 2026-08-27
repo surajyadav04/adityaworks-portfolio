@@ -8,7 +8,22 @@
   --color-text-light: #6B6B6B;
   
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-bebas: var(--font-bebas);
+  --font-rozha: var(--font-rozha);
+  --font-kalam: var(--font-kalam);
   --font-caveat: var(--font-caveat);
+}
+
+.font-rozha {
+  font-family: var(--font-rozha), serif;
+}
+
+.font-bebas {
+  font-family: var(--font-bebas), sans-serif;
+}
+
+.font-kalam {
+  font-family: var(--font-kalam), cursive;
 }
 
 :root {

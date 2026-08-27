@@ -176,10 +176,10 @@ export default function ContactSection() {
             </span>
           </h2>
           <a 
-            href="mailto:work@aditya.com" 
+            href="mailto:mustbeaditya.kumar@gmail.com" 
             className="contact-item inline-block text-xl md:text-3xl font-light underline decoration-primary underline-offset-8 hover:text-primary transition-colors"
           >
-            work@aditya.com
+            mustbeaditya.kumar@gmail.com
           </a>
         </div>
 

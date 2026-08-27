@@ -38,7 +38,7 @@ export default function WorkSection() {
       const overlay = card.querySelector(".hover-overlay");
       
       const tl = gsap.timeline({ paused: true });
-      tl.to(img, { scale: 1.03, brightness: 1.1, duration: 0.6, ease: "power2.out" })
+      tl.to(img, { scale: 1.03, filter: "brightness(1.1)", duration: 0.6, ease: "power2.out" })
         .to(overlay, { opacity: 1, duration: 0.4 }, 0);
 
       card.addEventListener("mouseenter", () => tl.play());
