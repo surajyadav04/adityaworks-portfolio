@@ -1,32 +1,30 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next";
+import { PROJECTS } from "@/data/projects";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://www.adityaworks.online'
-  
+  const baseUrl = "https://www.adityaworks.online";
+
+  const projectUrls: MetadataRoute.Sitemap = PROJECTS.map((project) => ({
+    url: `${baseUrl}/work/${project.title.toLowerCase().replace(/\s+/g, "-")}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
   return [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 1,
+      changeFrequency: "weekly",
+      priority: 1.0,
     },
     {
-      url: `${baseUrl}/#work`,
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      changeFrequency: "monthly",
+      priority: 0.9,
     },
-    {
-      url: `${baseUrl}/#about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/#contact`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
-  ]
+    ...projectUrls,
+  ];
 }
+
