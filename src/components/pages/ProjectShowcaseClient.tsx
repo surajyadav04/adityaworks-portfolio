@@ -145,16 +145,16 @@ export default function ProjectShowcaseClient({ slug }: Props) {
       </header>
 
       {/* Large Visual Section */}
-      <section className="reveal-visual mb-32 relative aspect-[16/8] md:aspect-[21/9] overflow-hidden border border-text/5 bg-text/5">
+      <section className="reveal-visual mb-32 relative aspect-[16/10] md:aspect-[16/9] overflow-hidden border border-text/10 bg-text/5 shadow-lg">
         <Image 
           src={project.previewImage} 
           alt={project.title} 
           fill 
           sizes="(max-width: 768px) 100vw, 100vw"
-          className="object-cover"
+          className="object-cover object-top"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
       </section>
 
       {/* Narrative Section */}
@@ -203,7 +203,7 @@ export default function ProjectShowcaseClient({ slug }: Props) {
                       alt={section.title} 
                       fill 
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
-                      className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                      className="object-cover object-top grayscale hover:grayscale-0 transition-all duration-700"
                     />
                   </div>
                 )}

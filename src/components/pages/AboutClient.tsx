@@ -268,11 +268,11 @@ export default function AboutClient() {
 
         {/* Floating "WHO AM I?" Split Headline */}
         <div className="relative z-10 pointer-events-none w-full text-center px-4 overflow-visible">
-          <h1 className="text-[17vw] sm:text-[15vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-none whitespace-nowrap overflow-visible drop-shadow-md">
-            <span ref={whoPart} className="inline-block relative">
+          <h1 className="text-[17vw] sm:text-[15vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-[0.9] whitespace-nowrap overflow-visible drop-shadow-md py-3">
+            <span ref={whoPart} className="inline-block relative px-2">
               WHO&nbsp;
             </span>
-            <span ref={amiPart} className="inline-block relative">
+            <span ref={amiPart} className="inline-block relative px-2 pr-4">
               AM&nbsp;I?
             </span>
           </h1>

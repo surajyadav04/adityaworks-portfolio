@@ -186,8 +186,21 @@ export default function ContactSection() {
         <div className="grid grid-cols-2 gap-12">
           <div className="flex flex-col gap-4">
             <span className="contact-item text-xs uppercase tracking-widest text-text-light/50 font-bold">Social</span>
-            {["LinkedIn", "Awwwards", "Dribbble", "Twitter"].map((s) => (
-              <a key={s} href="#" className="contact-item text-sm hover:text-accent transition-colors">{s}</a>
+            {[
+              { name: "GitHub", href: "https://github.com/surajyadav04" },
+              { name: "LinkedIn", href: "https://www.linkedin.com/in/aditya-kumar-b15485259/" },
+              { name: "Twitter / X", href: "https://twitter.com/adityaworks" },
+              { name: "Dribbble", href: "#" },
+            ].map((s) => (
+              <a
+                key={s.name}
+                href={s.href}
+                target={s.href.startsWith("http") ? "_blank" : undefined}
+                rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="contact-item text-sm hover:text-accent transition-colors"
+              >
+                {s.name}
+              </a>
             ))}
           </div>
           <div className="flex flex-col gap-4">

@@ -21,7 +21,7 @@ export default function StructuredData() {
         "email": "mustbeaditya.kumar@gmail.com",
         "description": "Senior Full-stack Creative Developer and Motion Designer crafting experience-driven narratives through high-performance code, WebGL, and GSAP motion architecture.",
         "sameAs": [
-          "https://linkedin.com/in/adityaworks",
+          "https://www.linkedin.com/in/aditya-kumar-b15485259/",
           "https://twitter.com/adityaworks",
           "https://github.com/surajyadav04"
         ],

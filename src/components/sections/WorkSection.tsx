@@ -68,7 +68,9 @@ export default function WorkSection() {
           <h2 className="text-section-title leading-tight">Selected<br />Works</h2>
           <span className="text-[10px] uppercase tracking-[0.4em] text-accent font-bold mt-4 italic">/ Case Studies</span>
         </div>
-        <span className="text-xs uppercase tracking-widest text-text-light font-medium italic">/ 04 projects</span>
+        <span className="text-xs uppercase tracking-widest text-text-light font-medium italic">
+          / {PROJECTS.length.toString().padStart(2, '0')} projects
+        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
@@ -78,18 +80,19 @@ export default function WorkSection() {
             className="project-card group cursor-pointer relative"
             onClick={() => handleProjectClick(project.title)}
           >
-            <div className="relative aspect-[4/5] bg-text/5 overflow-hidden mb-8 border border-text/5">
+            <div className="relative aspect-[16/10] bg-text/5 overflow-hidden mb-8 border border-text/10 shadow-sm">
               {/* Project Preview Image */}
               <Image 
                 src={project.previewImage} 
                 alt={project.title}
                 fill
-                className="object-cover transition-transform duration-700 brightness-[0.9]"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover object-top transition-transform duration-700 brightness-[0.98] group-hover:scale-[1.03]"
               />
               
               {/* Hover Overlay */}
               <div className="hover-overlay absolute inset-0 bg-primary/10 opacity-0 flex items-center justify-center pointer-events-none transition-opacity duration-500">
-                <span className="text-sm uppercase tracking-widest text-text font-bold px-6 py-3 bg-background/80 backdrop-blur-sm border border-text/10">View Case Study</span>
+                <span className="text-sm uppercase tracking-widest text-text font-bold px-6 py-3 bg-background/90 backdrop-blur-sm border border-text/10 shadow-lg">View Case Study</span>
               </div>
 
               {/* Concept Project Label */}

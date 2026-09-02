@@ -43,6 +43,112 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
   {
+    title: "PlacePrep AI",
+    category: "Institutional AI Platform / Full-Stack",
+    year: "2024",
+    description: "Master your interviews with precision. AI-powered mock interviews, resume intelligence, and real-time performance analytics — built for engineers who refuse to leave placement to chance.",
+    techStack: ["React 19", "Vite", "Tailwind CSS", "FastAPI", "Python", "SQLAlchemy", "Three.js", "Framer Motion", "Recharts", "aiosqlite"],
+    previewImage: "/projects/placeprep.png",
+    features: [
+      "The Forge (ATS Resume Analyzer): Section-by-section parsing, keyword optimization, and JD skill matching.",
+      "The Crucible (Mock Interviews): Real-time simulation evaluating Sentiment, Logic Clarity, and Confidence.",
+      "The Oracle (Performance Analytics): Interactive telemetry tracking placement readiness benchmarks and scoring curves.",
+      "The Gateway (Institutional Auth): Decoupled asynchronous JWT security with isolated multi-role access control."
+    ],
+    liveUrl: "https://placeprepai.vercel.app",
+    githubUrl: "https://github.com/surajyadav04/placeprep-ai",
+    overview: {
+      concept: "An intelligent institutional placement preparation gateway elevating the placement journey from an opaque process to a precise, data-driven science.",
+      purpose: "To act as a personal mentor, a rigorous interviewer, and an ATS-savvy resume critic—all wrapped in a responsive glassmorphism interface.",
+      why: "Students face opaque hiring criteria and lack immediate feedback; PlacePrep AI strips away the noise and provides structured institutional analytics."
+    },
+    designDetails: {
+      typography: {
+        name: "Playfair Display & Geist",
+        reasoning: "High-contrast editorial serif paired with an ultra-clean geometric sans-serif and monospace technical data for academic prestige and technical precision.",
+        fonts: [
+          { name: "Playfair Display", role: "Hero Display", usage: "Main project headings, prestige brand statements, and module titles." },
+          { name: "Geist", role: "UI & Telemetry", usage: "Dashboard metrics, feedback transcripts, and question prompts." },
+          { name: "DM Mono", role: "Technical Data", usage: "Code snippets, telemetry data points, and score breakdowns." }
+        ]
+      },
+      palette: {
+        colors: [
+          { name: "Warm Ivory", hex: "#FDFBF7", usage: "Canvas / Void (Light)", intent: "Parchment-inspired warm base delivering an editorial, low-fatigue experience." },
+          { name: "Slate Charcoal", hex: "#2D3748", usage: "Primary Text & Brand", intent: "Authoritative charcoal for high-contrast, structured readability." },
+          { name: "Frosted Lilac", hex: "#E9D8FD", usage: "Glass Cards & Glow", intent: "Soft ethereal lavender accentuating interactive glass panels and highlights." },
+          { name: "Emerald Sage", hex: "#38A169", usage: "Readiness & Mastery", intent: "Affirmative indicator for topic mastery and successful score benchmarks." }
+        ]
+      }
+    },
+    deepSections: [
+      {
+        id: "the-forge-ats",
+        title: "The Forge: Neural Semantic Vector Matching & Dual-Stream ATS Engine",
+        visual: "/projects/placeprep.png",
+        what: "An advanced NLP document analysis engine utilizing sentence-transformer embeddings and dual-stream PDF decoders to calculate cosine similarity against target Job Descriptions.",
+        why: "Standard ATS tools rely on naive keyword counts which fail on synonyms. The Forge projects candidate experience into high-dimensional semantic vector space for true contextual alignment.",
+        how: "Combines SentenceTransformer (all-MiniLM-L6-v2) cosine similarity tensors with PyMuPDF/pdfplumber fallback streams and weighted keyword-gap heuristics in asynchronous Python workers.",
+        codeSnippet: `# ── NEURAL SEMANTIC EMBEDDING & DUAL-STREAM ATS ENGINE ──
+from sentence_transformers import SentenceTransformer, util as st_util
+import fitz        # PyMuPDF low-level stream decoder
+import pdfplumber
+
+_st_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+async def match_jd_semantic_stream(resume_path: str, jd_text: str) -> Dict[str, Any]:
+    # Phase 1: Dual-Engine PyMuPDF / pdfplumber fallback text stream
+    text = ""
+    try:
+        with pdfplumber.open(resume_path) as pdf:
+            text = "\\n".join(page.extract_text() or "" for page in pdf.pages)
+    except Exception:
+        doc = fitz.open(resume_path)
+        text = "\\n".join(page.get_text() for page in doc)
+    
+    # Phase 2: Vector embedding & Cosine Similarity tensor projection
+    resume_emb = _st_model.encode(text, convert_to_tensor=True, show_progress_bar=False)
+    jd_emb = _st_model.encode(jd_text, convert_to_tensor=True, show_progress_bar=False)
+    
+    # High-dimensional semantic distance calculation (0.00 - 1.00)
+    semantic_score = float(st_util.cos_sim(resume_emb, jd_emb)[0][0])
+    
+    # Phase 3: Sectional weighted heuristic & keyword gap matrix
+    return {
+        "semantic_match": round(semantic_score * 100, 2),
+        "skills_coverage": calculate_skill_overlap(text, jd_text),
+        "readiness_index": compute_weighted_ats(semantic_score, text)
+    }`
+      },
+      {
+        id: "the-crucible-interviews",
+        title: "The Crucible: Real-Time Audio Cadence, Sentiment & Telemetry Stream",
+        visual: "/projects/placeprep.png",
+        what: "A real-time evaluation pipeline analyzing speech delivery cadence (WPM), hesitation token frequency, and vocal pitch confidence overlaid with Three.js 3D meshes and Recharts telemetry.",
+        why: "Gives candidates instant diagnostic feedback on vocal delivery and confidence before they sit in real institutional hiring rounds.",
+        how: "WebAudio API analyser nodes stream real-time decibel energy and frequency bands synced with Whisper transcription streams to evaluate confidence, pacing, and response logic.",
+        codeSnippet: `// ── REAL-TIME VOCAL CADENCE & CONFIDENCE EVALUATION ──
+export function evaluateCrucibleCadence(transcriptStream: string[], audioFrequencies: Uint8Array, durationSec: number) {
+  // 1. Words-Per-Minute & Hesitation Token Analysis
+  const totalWords = transcriptStream.join(" ").split(/\\s+/).filter(Boolean).length;
+  const wpm = Math.round((totalWords / durationSec) * 60);
+  const hesitationMatches = transcriptStream.join(" ").match(/\\b(um|uh|like|you know|basically)\\b/gi) || [];
+  
+  // 2. Frequency Band Variance (Vocal Pitch & Steady Energy)
+  const rmsEnergy = Math.sqrt(audioFrequencies.reduce((sum, v) => sum + v * v, 0) / audioFrequencies.length);
+  const cadenceScore = wpm >= 120 && wpm <= 160 ? 95 : Math.max(50, 95 - Math.abs(140 - wpm) * 0.8);
+  
+  // 3. Composite Confidence Coefficient
+  const confidenceIndex = Math.max(10, Math.min(99, Math.round(
+    cadenceScore * 0.6 + (rmsEnergy * 0.25) - (hesitationMatches.length * 4)
+  )));
+
+  return { wpm, confidenceIndex, clarity: hesitationMatches.length === 0 ? 98 : 82 };
+}`
+      }
+    ]
+  },
+  {
     title: "The Weird Wanderer",
     category: "Cinematic Experience / Web",
     year: "2024",
