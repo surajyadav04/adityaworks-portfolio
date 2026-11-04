@@ -16,11 +16,11 @@ if (typeof window !== "undefined") {
 }
 
 /**
- * PORTFOLIO HOME — CINEMATIC MODE SWITCHER (FIXED)
+ * PORTFOLIO HOME — CINEMATIC MODE SWITCHER
  * 
- * Fixes:
- * 1. Single-rendering all sections to prevent GSAP selector conflicts.
- * 2. ScrollTrigger.refresh() on mode toggle to fix "invisible works".
+ * Separation of Concerns:
+ * - PROFILE mode: Hero, WhoSection, KnowMe, ContactSection
+ * - WORK mode: WorkSection (Ashfall 3D Gallery & Selected Works ONLY)
  */
 export default function Home() {
   const { viewMode } = useViewContext();
@@ -36,67 +36,72 @@ export default function Home() {
       
       if (viewMode === "WORK") {
         gsap.set(introRef.current, { display: "none", opacity: 0 });
-        gsap.set(workContainerRef.current, { y: 0, opacity: 1 });
+        gsap.set(workContainerRef.current, { display: "block", opacity: 1, y: 0 });
       } else {
-        gsap.set(introRef.current, { display: "block", opacity: 1 });
+        gsap.set(introRef.current, { display: "block", opacity: 1, y: 0 });
+        gsap.set(workContainerRef.current, { display: "none", opacity: 0 });
       }
       return;
     }
 
     const tl = gsap.timeline({
       onStart: () => {
-        // SMOOTH SCROLL TO TOP ON SWITCH
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     });
 
     if (viewMode === "WORK") {
-      // 🛫 EXIT INTRO (PROFILE SECTIONS)
+      // 🛫 EXIT PROFILE VIEW
       tl.to(introRef.current, {
         opacity: 0,
-        y: -40,
-        duration: 0.6,
+        y: -30,
+        duration: 0.45,
         ease: "power2.inOut",
         onComplete: () => {
           gsap.set(introRef.current, { display: "none" });
-          // REFRESH SCROLLTRIGGER AFTER LAYOUT CHANGE
+          gsap.set(workContainerRef.current, { display: "block" });
           ScrollTrigger.refresh();
         }
       })
-      // 🛬 REVEAL WORK
+      // 🛬 REVEAL WORK VIEW ONLY
       .fromTo(workContainerRef.current, 
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power2.out" }
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }
       );
     } else {
-      // 🛫 EXIT WORK MODE (Show Intro Again)
-      tl.set(introRef.current, { display: "block", opacity: 0, y: 40 })
-      .to(introRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "power2.out",
+      // 🛫 EXIT WORK VIEW
+      tl.to(workContainerRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 0.45,
+        ease: "power2.inOut",
         onComplete: () => {
-          // REFRESH SCROLLTRIGGER AFTER LAYOUT CHANGE
+          gsap.set(workContainerRef.current, { display: "none" });
+          gsap.set(introRef.current, { display: "block" });
           ScrollTrigger.refresh();
         }
-      });
+      })
+      // 🛬 REVEAL PROFILE VIEW
+      .fromTo(introRef.current, 
+        { opacity: 0, y: -30 },
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }
+      );
     }
   }, [viewMode]);
 
   return (
     <main className="relative bg-background min-h-screen">
-      {/* 🖼️ PROFILE INTRO (Hero, Who, KnowMe) */}
+      {/* 🖼️ PROFILE VIEW: Hero, Who, KnowMe, Contact (NO work section here) */}
       <div ref={introRef} className="view-container">
         <Hero />
         <WhoSection />
         <KnowMe />
+        <ContactSection />
       </div>
 
-      {/* 🛠️ WORK & CONTACT (Rendered only ONCE) */}
-      <div ref={workContainerRef} className={`view-container ${viewMode === 'WORK' ? 'pt-24' : ''}`}>
+      {/* 🛠️ WORK VIEW: WorkSection ONLY */}
+      <div ref={workContainerRef} className="view-container" style={{ display: "none" }}>
         <WorkSection />
-        <ContactSection />
       </div>
     </main>
   );

@@ -1,0 +1,143 @@
+/* ============================================================================
+   VinylCrate: design tokens
+   susanoo.ui
+   ----------------------------------------------------------------------------
+   Every colour, size, radius, easing and type setting the component reads.
+   Change a value here to retheme it; VinylCrate.css never hard-codes these.
+
+   Tokens are scoped to .vinyl-crate-root, so they can't clash with your
+   app's own custom properties. Light is the default; put data-theme="dark"
+   on any ancestor (usually <html>) for the dark section.
+
+   The crate, the sleeves and the records are monochrome in both themes. Three
+   r, g, b tokens tint them: --vc-art-ink-rgb (the generated sleeve art),
+   --vc-vinyl-rgb (coloured vinyl) and --vc-crate-rgb (the wood).
+   ============================================================================ */
+
+/* ---------- Fonts (self-hosted) ---------- */
+/* Geist + Geist Mono, served from ./fonts. No third-party requests. Variable
+   files cover every weight. SIL Open Font License, see ./fonts/OFL.txt. */
+@font-face {
+  font-family: "Geist";
+  src: url('./fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url('./fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Light (default) ---------- */
+/* Monochrome: ink on paper. */
+.vinyl-crate-root {
+  /* Action: the Open button, the details link, focus ring */
+  --accent-primary: #16121f;
+  --accent-hover: #2b2440;
+  --text-on-accent: #fbfbfd;
+
+  /* Surfaces */
+  --bg-canvas: #f2f2f2;
+  --bg-elevated-1: #ffffff;
+  --border-default: #e2e0e7;
+  --border-strong: #cfccd6;
+
+  /* Text */
+  --text-primary: #16121f;
+  --text-secondary: #4b4559;
+  --text-tertiary: #6a6578;
+
+  /* Status */
+  --error: #d1342c;
+
+  /* The crate: sanded wood, as r, g, b. Faces are this colour, darkened
+     inside the crate and lit along the edges. Try 150, 110, 70 for pine. */
+  --vc-crate-rgb: 196, 193, 200;
+  --vc-crate-grain: 0.75;          /* how strong the grain is, 0 to 1 */
+  --vc-crate-inside: 0.34;         /* how much darker the inside of the crate is */
+
+  /* Generated sleeve art: two tones and a grey between them. Only used for
+     items without a cover image. --vc-art-ink-rgb tints every cover at once. */
+  --vc-art-paper: #f3f2f5;
+  --vc-art-ink-rgb: 20, 17, 26;
+  --vc-art-mid: #8d8995;
+
+  /* The back of a sleeve (seen on the flipped pile) */
+  --vc-sleeve-back: #e4e2e8;
+  --vc-sleeve-back-ink: #5d5868;
+  --vc-sleeve-edge: #f7f6f9;
+
+  /* The record: vinyl as r, g, b (try 180, 30, 40 for red vinyl), and the
+     paper label in its centre. */
+  --vc-vinyl-rgb: 17, 16, 20;
+  --vc-label: #f3f2f5;
+  --vc-label-ink: #16121f;
+
+  /* Size of a record sleeve at full size. The crate and everything in it
+     scale with this, and shrink to fit narrow containers. */
+  --vc-sleeve-size: 320px;
+
+  /* Shadows: one r, g, b and strength for everything the crate casts */
+  --shadow-rgb: 14, 10, 22;
+  --shadow-strength: 0.26;
+  --shadow-panel: 0 18px 50px rgba(14, 10, 22, 0.12), 0 0 0 1px var(--border-default);
+  --shadow-focus-ring: 0 0 0 2px var(--bg-canvas), 0 0 0 4px #16121f;
+
+  /* Shape + motion */
+  --radius-md: 10px;
+  --radius-panel: 18px;
+  --radius-pill: 999px;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Type */
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  --tr-display: -0.025em;
+  --tr-tight: -0.015em;
+  --tr-base: -0.005em;
+}
+
+/* ---------- Dark ---------- */
+/* Off-white on a violet-black. The crate turns to charcoal wood; the
+   records stay black. */
+[data-theme="dark"] .vinyl-crate-root {
+  --accent-primary: #fbfbfd;
+  --accent-hover: #e6e4ec;
+  --text-on-accent: #16121f;
+
+  --bg-canvas: #0e0a16;
+  --bg-elevated-1: #171022;
+  --border-default: rgba(251, 251, 253, 0.1);
+  --border-strong: rgba(251, 251, 253, 0.2);
+
+  --text-primary: #fbfbfd;
+  --text-secondary: #bdb8c8;
+  --text-tertiary: #9892a4;
+
+  --error: #f0736b;
+
+  --vc-crate-rgb: 72, 69, 78;
+  --vc-crate-grain: 1;
+  --vc-crate-inside: 0.5;
+
+  --vc-art-paper: #ecebef;
+  --vc-art-ink-rgb: 18, 15, 23;
+  --vc-art-mid: #7f7b88;
+
+  --vc-sleeve-back: #bdb9c4;
+  --vc-sleeve-back-ink: #45404f;
+  --vc-sleeve-edge: #e9e8ed;
+
+  --vc-vinyl-rgb: 14, 13, 17;
+  --vc-label: #ecebef;
+  --vc-label-ink: #16121f;
+
+  --shadow-rgb: 0, 0, 0;
+  --shadow-strength: 0.6;
+  --shadow-panel: 0 18px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-default);
+  --shadow-focus-ring: 0 0 0 2px var(--bg-canvas), 0 0 0 4px #fbfbfd;
+}

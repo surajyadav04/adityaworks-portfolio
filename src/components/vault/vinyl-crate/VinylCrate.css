@@ -1,0 +1,669 @@
+/* VinylCrate.css: a project carousel you flip through like records in a crate.
+   susanoo.ui
+   ------------------------------------------------------------------------
+   An optional heading, the crate, and a bar of controls under it. The
+   crate's walls and the sleeves are flat elements that JS moves into place
+   in 3D (each carries its own perspective, so nothing depends on the
+   browser sorting 3D layers); this file draws them. Colours, sizes and
+   shadows come from tokens.css.
+
+   Everything is scoped under .vinyl-crate-root: no bare body/html/* rules,
+   so nothing leaks into the rest of your app.
+   ============================================================================ */
+
+/* Scoped reset: zero specificity via :where(), so the component renders the
+   same whether or not your app has its own CSS reset. */
+:where(.vinyl-crate-root, .vinyl-crate-root *, .vinyl-crate-root *::before, .vinyl-crate-root *::after) {
+  box-sizing: border-box;
+}
+:where(.vinyl-crate-root) :where(button) { font: inherit; color: inherit; }
+:where(.vinyl-crate-root) :where(h2, h3, p) { margin: 0; }
+
+.vinyl-crate-root {
+  width: 100%;
+  container-type: inline-size;
+  position: relative;
+  /* Set --vc-section-padding on this element or any ancestor to change it. */
+  padding: var(--vc-section-padding, clamp(40px, 7vw, 88px) clamp(16px, 4vw, 40px));
+  overflow: hidden;            /* the crate's perspective never makes the page scroll sideways */
+  color: var(--text-primary);
+  background: var(--bg-canvas);
+  font-family: var(--font-sans);
+  letter-spacing: var(--tr-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+.vc-inner {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
+.vc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================== HEADING ============================== */
+.vc-head {
+  margin-bottom: clamp(8px, 2cqi, 20px);
+  text-align: center;
+}
+.vc-eyebrow {
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.vc-title {
+  font-size: clamp(28px, 4.4cqi, 44px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: var(--tr-display);
+  text-wrap: balance;
+}
+.vc-desc {
+  max-width: 46ch;
+  margin: 14px auto 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* =============================== STAGE =============================== */
+/* The wrapper takes the page's width; the stage inside it is laid out in
+   crate units and scaled to fit (both set from JS). Vertical swipes on a
+   touch screen stay with the page; sideways ones flip. */
+.vc-wrap {
+  position: relative;
+  height: 520px;               /* replaced by the measured height */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: height 420ms var(--ease-out-quart);
+}
+.vc-wrap.is-dragging,
+.vc-wrap.is-dragging .vc-sleeve { cursor: grabbing; }
+
+/* Measures --vc-sleeve-size in whatever unit it's given. */
+.vc-probe {
+  position: absolute;
+  width: var(--vc-sleeve-size);
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.vc-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  visibility: hidden;
+}
+.vc-stage.is-ready { visibility: visible; }
+
+/* The listbox holds the sleeves but adds no stacking context (no z-index,
+   no transform), so its sleeves paint between the crate's walls. */
+.vc-crate {
+  position: absolute;
+  inset: 0;
+  outline: 0;
+}
+
+.vc-floor-shadow {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.1)), rgba(var(--shadow-rgb), 0) 100%);
+  pointer-events: none;
+}
+
+.vc-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity 400ms var(--ease-out-quart);
+  pointer-events: none;
+}
+.vc-hint.is-on { opacity: 1; }
+
+/* Dims the crate behind a record that's been taken out, to 93%. JS sets its
+   opacity; it lets clicks through (a click anywhere puts the record back). */
+.vc-scrim {
+  position: absolute;
+  inset: 0 -400px;
+  z-index: 800;
+  background: var(--bg-canvas);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* =============================== CRATE =============================== */
+/* Wood in the --vc-crate-rgb colour. The grain is fractal noise stretched
+   along the planks, dark streaks and light ones, on its own layer so
+   --vc-crate-grain can turn it up or down. Faces inside the crate are
+   shaded; the top edges of the walls catch the light. */
+.vc-plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background-color: rgb(var(--vc-crate-rgb));
+  pointer-events: none;
+}
+.vc-grain {
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='120'%3E%3Cfilter id='w' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.4' numOctaves='4' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.9 0 0 0 -0.85'/%3E%3C/filter%3E%3Crect width='520' height='120' filter='url(%23w)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='120'%3E%3Cfilter id='w' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.4' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.6 0 0 0 -0.95'/%3E%3C/filter%3E%3Crect width='520' height='120' filter='url(%23w)'/%3E%3C/svg%3E");
+  background-size: 520px 120px;
+  opacity: var(--vc-crate-grain);
+}
+.vc-p-rim .vc-grain { background-size: 520px 60px; }
+
+/* Inside faces: shaded, darker towards the bottom where less light gets in. */
+.vc-p-back,
+.vc-p-right { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, var(--vc-crate-inside)); }
+.vc-p-floor { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, calc(var(--vc-crate-inside) * 1.5)); }
+.vc-p-back::after,
+.vc-p-right::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, calc(var(--vc-crate-inside) * 0.6)));
+}
+/* The near wall, seen from outside: a touch darker than the front, which
+   faces the light. */
+.vc-p-left { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.16), inset -2px 0 0 rgba(255, 255, 255, 0.18); }
+/* Plank seams on the walls. */
+.vc-p-side::before,
+.vc-p-back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(180deg, transparent 0 60px, rgba(0, 0, 0, 0.3) 60px 61.5px, rgba(255, 255, 255, 0.1) 61.5px 62.5px);
+}
+/* Top edges: lit from above. */
+.vc-p-rim { box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.2); }
+.vc-p-rim-front { box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.26), inset 0 -1px 0 rgba(0, 0, 0, 0.25); }
+
+/* The front: two planks with a seam between them, a routed hand hold, a
+   soft round-over on the top edge and a shadow along the bottom. */
+.vc-p-front {
+  border-radius: 0 0 3px 3px;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -10px 16px -8px rgba(0, 0, 0, 0.35);
+}
+.vc-seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  height: 2.5px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.12) 60%, rgba(255, 255, 255, 0.18));
+}
+/* Hand holds: slots right through the wood. From outside they look into
+   the dark of the crate; the far wall's, seen from inside, shows the page
+   behind it. */
+.vc-handle {
+  position: absolute;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.78);
+  box-shadow: inset 0 4px 3px rgba(0, 0, 0, 0.55), inset 0 -1.5px 0 rgba(255, 255, 255, 0.16), 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.vc-p-front .vc-handle { left: 50%; top: 14px; width: 96px; margin-left: -48px; }
+.vc-p-side .vc-handle { left: 12%; top: 58px; width: 30%; height: 24px; border-radius: 12px; }
+.vc-p-right .vc-handle {
+  background: var(--bg-canvas);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35), inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* =============================== SLEEVE =============================== */
+/* A 300 x 300 square moved into place by JS. It keeps its children in 3D
+   so the cover, the back, the top edge and the record can each face their
+   own way. --vc-hide clips off the bottom that's always behind the front
+   wall, so a sleeve tipping over the wall never paints over it. */
+.vc-sleeve {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 300px;
+  transform-origin: 0 0;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.vc-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  clip-path: inset(-10px -10px var(--vc-hide, 46px) -10px);
+}
+.vc-front { transform: translateZ(0.8px); }
+.vc-back {
+  transform: translateZ(-0.8px) rotateX(180deg);
+  background: var(--vc-sleeve-back);
+  /* Turned over, so the sleeve's bottom is this face's top. */
+  clip-path: inset(var(--vc-hide, 46px) -10px -10px -10px);
+}
+.vc-front { overflow: visible; }
+.vc-front > .vc-art,
+.vc-front > .vc-cover {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.vc-cover { object-fit: cover; }
+.vc-back-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Light and shade: the shade goes darker as a sleeve stands further back
+   or turns away from the light (set per sleeve from JS). */
+.vc-shade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  pointer-events: none;
+}
+.vc-front > .vc-shade { opacity: var(--vc-shade-front, 0); }
+.vc-back > .vc-shade { opacity: var(--vc-shade-back, 0); }
+
+/* Cardboard: a faint ring worn into the sleeve by the record inside, a
+   sheen across it, and a crisp edge. */
+.vc-wear {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 45.2%, rgba(255, 255, 255, 0.05) 46%, transparent 47.2%),
+    radial-gradient(circle at 50% 50%, transparent 0 46.4%, rgba(0, 0, 0, 0.04) 47.1%, transparent 48%);
+  pointer-events: none;
+}
+.vc-gloss {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(128deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+/* The top edge of the sleeve: a strip of cardboard, seen from above. */
+.vc-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1.5px;
+  height: 3px;
+  background: var(--vc-sleeve-edge);
+  box-shadow: inset 0 0 0 99px rgba(0, 0, 0, var(--vc-shade-edge, 0));
+  transform: rotateX(90deg);
+}
+
+/* A lifted sleeve casts a shadow (JS sets --vc-lift, 0..1). It sits just
+   behind the faces, outside their clip. */
+.vc-drop {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(-1.6px);
+  box-shadow:
+    0 34px 60px -12px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.5 * var(--vc-lift, 0))),
+    0 10px 20px -6px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 0.8 * var(--vc-lift, 0)));
+  pointer-events: none;
+}
+/* Keyboard focus rings the sleeve at the front. */
+.vc-front::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border: 2.5px solid var(--accent-primary);
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 160ms var(--ease-out-quart);
+  pointer-events: none;
+}
+.vc-crate:focus-visible .vc-sleeve.is-front .vc-front::after { opacity: 1; }
+
+/* Generated art: two tones that swap on dark sleeves. */
+.vc-art {
+  --a-bg: var(--vc-art-paper);
+  --a-fg: rgb(var(--vc-art-ink-rgb));
+}
+.vc-art.is-dark {
+  --a-bg: rgb(var(--vc-art-ink-rgb));
+  --a-fg: var(--vc-art-paper);
+}
+.vc-a-bg { fill: var(--a-bg); }
+.vc-a-fg { fill: var(--a-fg); }
+.vc-a-mid { fill: var(--vc-art-mid); }
+.vc-a-line { fill: none; }
+.vc-a-fg-s { stroke: var(--a-fg); }
+.vc-a-t {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.vc-a-m {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.vc-b-t {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  fill: var(--vc-sleeve-back-ink);
+}
+.vc-b-ink { fill: var(--vc-sleeve-back-ink); }
+
+/* =============================== RECORD =============================== */
+/* Sits between the sleeve's front and back; JS slides it out to the right.
+   The grooves and the label turn; the sheen, like a real reflection,
+   stays where it is. The grooves are a soft ring every 3.6px: any finer
+   and they shimmer (moire) on 1x screens. */
+.vc-record {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  width: 282px;
+  height: 282px;
+  border-radius: 50%;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+}
+.vc-record-spin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.vc-vinyl {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(var(--vc-vinyl-rgb)) 0 18.6%, transparent 18.8%),
+    radial-gradient(circle, transparent 0 34%, rgba(255, 255, 255, 0.07) 34.3%, transparent 35%),
+    radial-gradient(circle, transparent 0 51%, rgba(255, 255, 255, 0.06) 51.4%, transparent 52.2%),
+    radial-gradient(circle, transparent 0 66%, rgba(255, 255, 255, 0.06) 66.4%, transparent 67.2%),
+    radial-gradient(circle, transparent 0 81%, rgba(255, 255, 255, 0.06) 81.4%, transparent 82.2%),
+    radial-gradient(circle, transparent 0 95.6%, rgba(255, 255, 255, 0.14) 96.4%, transparent 97.6%, rgba(0, 0, 0, 0.4) 99%),
+    repeating-radial-gradient(circle, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0) 1.8px, rgba(255, 255, 255, 0.04) 3.6px),
+    rgb(var(--vc-vinyl-rgb));
+}
+/* A faint scuff that turns with the record, so the spin reads even where
+   the grooves look the same all the way round. */
+.vc-scuff {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.09);
+  transform: rotate(-24deg);
+}
+.vc-label {
+  position: absolute;
+  left: 32%;
+  top: 32%;
+  width: 36%;
+  height: 36%;
+}
+.vc-l-paper { fill: var(--vc-label); }
+.vc-l-line { stroke: var(--vc-label-ink); opacity: 0.4; }
+.vc-l-ink { fill: var(--vc-label-ink); }
+.vc-l-title {
+  fill: var(--vc-label-ink);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.vc-l-sub,
+.vc-l-rpm {
+  fill: var(--vc-label-ink);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+.vc-l-hole { fill: #0b0a0d; }
+.vc-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 205deg, transparent 0deg, rgba(255, 255, 255, 0.14) 24deg, transparent 58deg,
+      transparent 180deg, rgba(255, 255, 255, 0.1) 204deg, transparent 238deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 19%, #000 19.5%);
+  mask: radial-gradient(circle, transparent 0 19%, #000 19.5%);
+  pointer-events: none;
+}
+
+/* ============================== DETAILS ============================== */
+.vc-details {
+  position: absolute;
+  z-index: 2;
+  padding: 26px 26px 24px;
+  border-radius: var(--radius-panel);
+  background: var(--bg-elevated-1);
+  box-shadow: var(--shadow-panel);
+  outline: 0;
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: auto;
+  cursor: auto;
+}
+.vc-wrap.is-narrow .vc-details { left: 0; right: 0; }
+/* The panel takes focus so its title and text are read first; it isn't a
+   control itself, so it shows no ring. Its buttons do. */
+
+.vc-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 160ms var(--ease-out-quart), color 160ms var(--ease-out-quart);
+}
+.vc-close:hover { border-color: var(--border-strong); color: var(--text-primary); }
+
+.vc-d-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.vc-d-meta span::before { content: '\00b7'; margin-right: 10px; }
+.vc-d-title {
+  padding-right: 44px;
+  font-size: clamp(24px, 3cqi, 30px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: var(--tr-display);
+}
+.vc-d-sub {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+.vc-d-desc {
+  margin-top: 14px;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+.vc-d-actions { margin-top: 22px; }
+.vc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: var(--tr-tight);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 160ms var(--ease-out-quart), transform 160ms var(--ease-out-quart);
+}
+.vc-cta:hover { background: var(--accent-hover); }
+.vc-cta:active { transform: scale(0.97); }
+.vc-cta[aria-busy] { cursor: progress; }
+.vc-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: vc-spin 0.7s linear infinite;
+}
+.vc-d-error {
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--error);
+}
+
+/* ============================== CONTROLS ============================= */
+.vc-bar {
+  transition: opacity 300ms var(--ease-out-quart);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  margin-top: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-default);
+}
+/* Out of reach while a record is out, and it looks it. */
+.vinyl-crate-root:not([data-state="crate"]) .vc-bar { opacity: 0.35; }
+
+.vc-now {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.vc-count {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+.vc-count b { font-weight: 600; color: var(--text-primary); }
+.vc-now-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.vc-now-title,
+.vc-now-sub {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.vc-now-title { font-size: 15px; font-weight: 600; letter-spacing: var(--tr-tight); }
+.vc-now-sub { font-size: 13px; color: var(--text-tertiary); }
+
+.vc-buttons {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+.vc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated-1);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: var(--tr-tight);
+  cursor: pointer;
+  transition: border-color 160ms var(--ease-out-quart), background 160ms var(--ease-out-quart),
+    opacity 160ms var(--ease-out-quart), transform 160ms var(--ease-out-quart);
+}
+.vc-btn:hover { border-color: var(--border-strong); }
+.vc-btn:active:not([aria-disabled]) { transform: scale(0.96); }
+.vc-btn[aria-disabled] { opacity: 0.35; cursor: default; }
+.vc-icon { width: 42px; }
+.vc-open {
+  padding: 0 18px 0 15px;
+  border-color: transparent;
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+}
+.vc-open:hover { border-color: transparent; background: var(--accent-hover); }
+
+.vc-btn:focus-visible,
+.vc-cta:focus-visible,
+.vc-close:focus-visible {
+  outline: 0;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+@keyframes vc-spin { to { transform: rotate(360deg); } }
+
+/* ========================== REDUCED MOTION ========================== */
+/* No tipping or spinning (JS cross-fades instead); nothing slides. */
+.vinyl-crate-root.is-still .vc-wrap,
+.vinyl-crate-root.is-still .vc-hint { transition: none; }
+.vinyl-crate-root.is-still .vc-spinner { animation: none; border-right-color: currentColor; opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .vc-wrap, .vc-hint, .vc-btn, .vc-cta, .vc-front::after { transition: none; }
+  .vc-spinner { animation: none; border-right-color: currentColor; opacity: 0.5; }
+}
+
+/* ============================== NARROW ============================== */
+@container (max-width: 560px) {
+  .vc-bar { flex-direction: column; align-items: stretch; }
+  .vc-buttons { width: 100%; }
+  .vc-open { flex: 1; }
+  .vc-details { padding: 22px 20px 20px; }
+}

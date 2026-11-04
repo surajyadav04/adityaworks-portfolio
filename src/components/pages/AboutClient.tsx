@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import ContactSection from "@/components/sections/ContactSection";
 
 const TOTAL_FRAMES = 300;
@@ -39,7 +40,7 @@ export default function AboutClient() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 🎨 CRISP SCREEN-COVER CANVAS RENDER (Retains current frame, never shows blank screen)
+  // 🎨 CRISP SCREEN-COVER CANVAS RENDER
   const renderFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -48,7 +49,6 @@ export default function AboutClient() {
 
     const clampedIndex = Math.min(Math.max(1, Math.round(frameIndex)), TOTAL_FRAMES);
 
-    // Get requested frame or fallback to closest loaded frame
     let img = framesRef.current[clampedIndex];
     if (!img || !img.complete || img.naturalWidth === 0) {
       for (let offset = 1; offset <= 50; offset++) {
@@ -79,7 +79,6 @@ export default function AboutClient() {
     ctx.save();
     ctx.scale(dpr, dpr);
 
-    // 🌟 FULL EDGE-TO-EDGE SCREEN COVER
     const imgRatio = img.naturalWidth / img.naturalHeight;
     const canvasRatio = canvasWidth / canvasHeight;
 
@@ -97,7 +96,6 @@ export default function AboutClient() {
     const drawX = (canvasWidth - drawWidth) / 2;
     const drawY = (canvasHeight - drawHeight) / 2;
 
-    // High quality crisp smoothing
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
@@ -106,12 +104,11 @@ export default function AboutClient() {
     lastDrawnFrameRef.current = clampedIndex;
   }, []);
 
-  // 📥 FAST BACKGROUND PRELOADER (Instant 1st frame, zero freeze)
+  // 📥 FAST BACKGROUND PRELOADER
   useEffect(() => {
     let isCancelled = false;
     const images: HTMLImageElement[] = new Array(TOTAL_FRAMES + 1);
 
-    // 1. Load 1st frame immediately for instantaneous visual
     const firstImg = new Image();
     firstImg.src = getFramePath(1);
     firstImg.onload = () => {
@@ -123,7 +120,6 @@ export default function AboutClient() {
     };
     images[1] = firstImg;
 
-    // 2. Preload remaining frames
     for (let i = 2; i <= TOTAL_FRAMES; i++) {
       const img = new Image();
       img.src = getFramePath(i);
@@ -137,12 +133,11 @@ export default function AboutClient() {
     };
   }, [renderFrame]);
 
-  // 🔄 ULTRA-FLUID ZERO-LAG ANIMATION LOOP
+  // 🔄 ULTRA-FLUID ANIMATION LOOP
   useEffect(() => {
     const animate = () => {
       const diff = targetFrameRef.current - currentFrameRef.current;
 
-      // Snappy lerp (0.22) for liquid-smooth response without delay or jitter
       if (Math.abs(diff) > 0.005) {
         currentFrameRef.current += diff * 0.22;
       } else {
@@ -177,7 +172,6 @@ export default function AboutClient() {
     }
     if (!container.current) return;
 
-    // 🎬 GSAP SCROLL TIMELINE WITH NARRATIVE REVEALS
     const scrollTl = gsap.timeline({
       scrollTrigger: {
         trigger: container.current,
@@ -193,7 +187,6 @@ export default function AboutClient() {
       },
     });
 
-    // 1. "WHO AM I?" Headline Splits Apart
     scrollTl
       .to(whoPart.current, {
         yPercent: -140,
@@ -209,7 +202,6 @@ export default function AboutClient() {
         duration: 0.8,
         ease: "power2.inOut",
       }, 0)
-      // 2. Story Beat 1: Slides up, holds cleanly, then dissolves
       .fromTo(
         ".story-beat-1",
         { opacity: 0, y: 40, filter: "blur(6px)" },
@@ -221,7 +213,6 @@ export default function AboutClient() {
         { opacity: 0, y: -30, filter: "blur(6px)", duration: 0.5, ease: "power2.in" },
         1.25
       )
-      // 3. Story Beat 2: Slides up, holds cleanly, then dissolves
       .fromTo(
         ".story-beat-2",
         { opacity: 0, y: 40, filter: "blur(6px)" },
@@ -234,7 +225,7 @@ export default function AboutClient() {
         2.35
       );
 
-    // Content reveal below
+    // Editorial Content reveal below
     gsap.fromTo(
       ".about-detail-block",
       { y: 50, opacity: 0 },
@@ -260,13 +251,11 @@ export default function AboutClient() {
         ref={container}
         className="relative w-full h-screen overflow-hidden bg-background flex items-center justify-center"
       >
-        {/* Fullscreen Video Canvas — Crisp & Edge-to-Edge */}
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none mix-blend-multiply opacity-95"
         />
 
-        {/* Floating "WHO AM I?" Split Headline */}
         <div className="relative z-10 pointer-events-none w-full text-center px-4 overflow-visible">
           <h1 className="text-[17vw] sm:text-[15vw] md:text-[12vw] font-bebas font-black text-[#8B0000] uppercase italic leading-[0.9] whitespace-nowrap overflow-visible drop-shadow-md py-3">
             <span ref={whoPart} className="inline-block relative px-2">
@@ -278,9 +267,7 @@ export default function AboutClient() {
           </h1>
         </div>
 
-        {/* 🎬 CINEMATIC NARRATIVE (South Indian Blockbuster Style — Rozha One + Red/White) */}
         <div className="absolute inset-0 pointer-events-none z-30 flex flex-col justify-between p-8 sm:p-12 md:p-16">
-          {/* Statement 1: Top Left */}
           <div className="story-beat-1 max-w-xl opacity-0">
             <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#D14836] font-black mb-2 font-mono drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               / 01 ORIGIN
@@ -293,7 +280,6 @@ export default function AboutClient() {
             </p>
           </div>
 
-          {/* Statement 2: Bottom Right */}
           <div className="story-beat-2 self-end max-w-xl text-right opacity-0">
             <p className="text-xs sm:text-sm uppercase tracking-[0.35em] text-[#D14836] font-black mb-2 font-mono drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               / 02 MANIFESTO
@@ -313,6 +299,7 @@ export default function AboutClient() {
         ref={contentSection}
         className="relative py-24 px-8 md:px-24 max-w-6xl mx-auto z-20 bg-background"
       >
+        {/* Chapter 1: The Architect of Experiences */}
         <div className="about-detail-block mb-24">
           <h2 className="text-xs uppercase tracking-[0.4em] text-accent font-bold mb-8 italic">
             / THE ARCHITECT OF EXPERIENCES
@@ -339,6 +326,7 @@ export default function AboutClient() {
           </div>
         </div>
 
+        {/* Chapter 2: Pillars (Vision, Craft, Future) */}
         <div className="about-detail-block grid grid-cols-1 md:grid-cols-3 gap-12 py-24 border-t border-text/10">
           <div>
             <h3 className="font-bebas text-3xl text-accent mb-4 tracking-wider uppercase">
@@ -367,6 +355,62 @@ export default function AboutClient() {
               Constantly exploring the boundaries of the web, ensuring that every
               experience I build is ready for the high-end landscape of tomorrow.
             </p>
+          </div>
+        </div>
+
+        {/* 🎬 Chapter 3: Culture & Influences (Clean Editorial — No Boxed Cards) */}
+        <div className="about-detail-block py-24 border-t border-text/10">
+          <h2 className="text-xs uppercase tracking-[0.4em] text-accent font-bold mb-8 italic">
+            / 04 CULTURE &amp; INFLUENCES
+          </h2>
+          <p className="text-section-title leading-tight mb-12">
+            Architecture gave me structure.{" "}
+            <span className="text-text-light underline decoration-accent/30">
+              Cinema gave me tension.
+            </span>
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div className="space-y-6">
+              <p className="text-body text-text-light leading-relaxed opacity-90">
+                Literature and soundscapes gave me depth. Beyond the code and architecture, my design sensibility is fueled by the films, music, books, and physical monuments that refuse to be ordinary.
+              </p>
+              <p className="text-body text-text-light leading-relaxed opacity-90">
+                I maintain a living archive of the cinematic scale, sonic frequencies, and philosophical writings that shape how I engineer digital worlds.
+              </p>
+            </div>
+
+            <div className="flex flex-col justify-between border-l border-text/10 pl-8 md:pl-12">
+              <div>
+                <span className="text-xs uppercase font-mono tracking-widest text-text-light/50 font-bold block mb-4">
+                  Archive Highlights
+                </span>
+                <div className="flex flex-wrap gap-2 text-xs font-mono text-text-light">
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Blade Runner 2049</span>
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Invisible Cities</span>
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Daft Punk</span>
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Tadao Ando</span>
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Trent Reznor</span>
+                  <span className="bg-text/5 px-3 py-1 rounded-full">• Dune: Part Two</span>
+                </div>
+              </div>
+
+              <div className="pt-10">
+                <Link
+                  href="/vault"
+                  className="group inline-flex items-center gap-3 text-sm font-mono uppercase tracking-[0.2em] font-bold text-accent hover:text-text transition-colors cursor-pointer"
+                >
+                  <span className="underline underline-offset-8 decoration-accent/60 group-hover:decoration-text">
+                    Explore The Creative Vault
+                  </span>
+                  <span className="text-base transform group-hover:translate-x-1.5 transition-transform">
+                    →
+                  </span>
+                </Link>
+                <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-text-light/50 mt-3">
+                  Interactive 3D optical gallery · Inspired by A24
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
