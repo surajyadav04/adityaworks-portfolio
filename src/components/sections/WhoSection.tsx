@@ -139,7 +139,7 @@ export default function WhoSection() {
         </div>
 
         {/* ✊ TYPOGRAPHY 2: INQUILAB BACKGROUND (TRUE STROKE REVEAL - Z-0) */}
-        <div ref={inquilabText} className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none px-4 w-full -mt-24">
+        <div ref={inquilabText} className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none px-4 w-full -mt-24" style={{ willChange: "transform" }}>
           <svg className="w-full h-auto overflow-visible" viewBox="0 0 1200 350" style={{ filter: "url(#shaky-ink)" }}>
             <text 
               x="50%" y="50%" 
@@ -168,7 +168,7 @@ export default function WhoSection() {
 
         {/* 🖼️ PORTRAIT (STICKY BACKGROUND - Z-10) */}
         <div ref={imageWrapper} className="absolute inset-0 w-full h-[105vh] flex items-center justify-center z-10 pointer-events-none"
-             style={{ maskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" }}>
+             style={{ willChange: "transform", maskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)", WebkitMaskImage: "radial-gradient(ellipse at 50% 50%, #000 20%, transparent 80%)" }}>
           <img src="/images/aditya/ADI (2).png" alt="Aditya" className="w-full h-full object-contain grayscale opacity-85 contrast-[185%] brightness-[135%] mix-blend-multiply" />
         </div>
       </div>

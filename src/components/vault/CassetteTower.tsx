@@ -497,7 +497,7 @@ export default function CassetteTower({
       alpha: false,
     });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0xf2f2f2, 1);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
@@ -691,24 +691,29 @@ export default function CassetteTower({
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+      if (document.hidden) return;
       const now = performance.now();
       const dt = Math.min((now - prevTime) / 1000, 0.05);
       prevTime = now;
 
       if (!isPointerDragging) {
-        liveStateRef.current.spinVelocity *= 0.93;
-        liveStateRef.current.spin += liveStateRef.current.spinVelocity * dt + 0.0014;
+        liveStateRef.current.spinVelocity *= Math.exp(-4.5 * dt);
+        liveStateRef.current.spin += liveStateRef.current.spinVelocity * dt + 0.085 * dt;
       }
       towerGroup.rotation.y = liveStateRef.current.spin;
 
-      liveStateRef.current.cameraY +=
-        (liveStateRef.current.cameraYTarget - liveStateRef.current.cameraY) * (dt * 6.5);
+      liveStateRef.current.cameraY = THREE.MathUtils.damp(
+        liveStateRef.current.cameraY,
+        liveStateRef.current.cameraYTarget,
+        6.5,
+        dt
+      );
       camera.position.y = liveStateRef.current.cameraY;
 
       cassetteEntries.forEach((c) => {
         const isHovered = c.index === hoveredIdx;
         c.targetPull = isHovered ? 0.48 : 0;
-        c.pullDistance += (c.targetPull - c.pullDistance) * (dt * 9.5);
+        c.pullDistance = THREE.MathUtils.damp(c.pullDistance, c.targetPull, 9.5, dt);
 
         c.pullGroup.position.z = c.pullDistance;
         c.pullGroup.position.x = -c.pullDistance * 0.15;

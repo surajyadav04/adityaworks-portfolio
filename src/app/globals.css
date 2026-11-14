@@ -65,6 +65,7 @@ html::-webkit-scrollbar,
   z-index: 9999;
   mix-blend-mode: difference;
   transition: transform 0.1s ease;
+  will-change: transform;
 }
 
 /* Grain Overlay */
@@ -79,6 +80,8 @@ html::-webkit-scrollbar,
   z-index: 9990;
   opacity: 0.04;
   background-image: url("/noise.svg");
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Typography Utilities */

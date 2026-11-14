@@ -13,6 +13,7 @@ import Link from "next/link";
 import { VAULT_ITEMS, VaultCategory, VaultItem } from "@/data/vault";
 import CassetteTower from "@/components/vault/CassetteTower";
 import VinylExperience from "@/components/vault/VinylExperience";
+import StripePressBooks from "@/components/vault/StripePressBooks";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXACT A24 SPECIFICATIONS (reverse-engineered from a24.raviklaassens.com)
@@ -554,7 +555,7 @@ export default function VaultClient() {
       alpha: true,
     });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(A24.backgroundColor, 1);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = A24.exposure;
@@ -745,15 +746,19 @@ export default function VaultClient() {
       }
     };
 
+    let pointerDirty = false;
+    let lastHoverX = 0;
+    let lastHoverY = 0;
+
     const onPointerMove = (e: PointerEvent) => {
       mouseNX = (e.clientX / W) * 2 - 1;
       mouseNY = -((e.clientY / H) * 2 - 1);
 
-      // Hover Raycasting when not dragging
+      // Defer hover raycasting to animation frame (zero pointer-move jank)
       if (!isDragging) {
-        const hit = getRaycastHit(e.clientX, e.clientY);
-        hoveredIndex = hit ? hit.index : -1;
-        renderer.domElement.style.cursor = hit ? "grab" : "default";
+        lastHoverX = e.clientX;
+        lastHoverY = e.clientY;
+        pointerDirty = true;
       } else {
         const deltaX = e.clientX - lastClientX;
         const deltaY = e.clientY - lastClientY;
@@ -849,6 +854,7 @@ export default function VaultClient() {
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
+      if (document.hidden) return;
       const now = performance.now();
       const dt = Math.min((now - prevTime) / 1000, 0.05);
       prevTime = now;
@@ -857,13 +863,21 @@ export default function VaultClient() {
       const targetIdx = liveRef.current.activeIndex;
       const flippedGlobal = liveRef.current.isFlipped;
 
-      // Smooth inertia scroll decay
-      scrollAccum *= 0.92;
+      // Throttled hover raycast once per frame when pointer moved
+      if (pointerDirty && !isDragging) {
+        pointerDirty = false;
+        const hit = getRaycastHit(lastHoverX, lastHoverY);
+        hoveredIndex = hit ? hit.index : -1;
+        renderer.domElement.style.cursor = hit ? "grab" : "default";
+      }
+
+      // Smooth frame-rate independent inertia scroll decay
+      scrollAccum *= Math.exp(-5.0 * dt);
       if (Math.abs(scrollAccum) < 0.2) scrollAccum = 0;
 
-      // Ambient camera tilt
-      cameraTiltX += (mouseNY * 0.15 - cameraTiltX) * 0.055;
-      cameraTiltY += (mouseNX * 0.22 - cameraTiltY) * 0.055;
+      // Ambient camera tilt (frame-rate independent exponential damp)
+      cameraTiltX = THREE.MathUtils.damp(cameraTiltX, mouseNY * 0.15, 3.6, dt);
+      cameraTiltY = THREE.MathUtils.damp(cameraTiltY, mouseNX * 0.22, 3.6, dt);
 
       discEntries.forEach((d) => {
         const offset = d.index - targetIdx;
@@ -899,15 +913,15 @@ export default function VaultClient() {
         const tZ = -absOffset * A24.depthGap;
         const tY = isActive ? A24.activeDiscY : 0;
 
-        d.group.position.x += (tX - d.group.position.x) * (dt * 8);
-        d.group.position.z += (tZ - d.group.position.z) * (dt * 8);
-        d.group.position.y += (tY - d.group.position.y) * (dt * 8);
+        d.group.position.x = THREE.MathUtils.damp(d.group.position.x, tX, 8, dt);
+        d.group.position.z = THREE.MathUtils.damp(d.group.position.z, tZ, 8, dt);
+        d.group.position.y = THREE.MathUtils.damp(d.group.position.y, tY, 8, dt);
 
         // Scale interpolation
         const tScale = isActive
           ? A24.galleryScale
           : Math.max(A24.inactiveScale, A24.galleryScale - absOffset * 0.14);
-        d.group.scale.x += (tScale - d.group.scale.x) * (dt * 8);
+        d.group.scale.x = THREE.MathUtils.damp(d.group.scale.x, tScale, 8, dt);
         d.group.scale.y = d.group.scale.x;
         d.group.scale.z = d.group.scale.x;
 
@@ -916,23 +930,23 @@ export default function VaultClient() {
         if (isActive) {
           baseY = flippedGlobal ? Math.PI : 0;
           baseY += cameraTiltY;
-          d.group.rotation.x += (cameraTiltX - d.group.rotation.x) * 0.07;
+          d.group.rotation.x = THREE.MathUtils.damp(d.group.rotation.x, cameraTiltX, 4.5, dt);
         } else {
           baseY = offset * -0.22;
-          d.group.rotation.x += (0 - d.group.rotation.x) * 0.07;
+          d.group.rotation.x = THREE.MathUtils.damp(d.group.rotation.x, 0, 4.5, dt);
         }
-        d.group.rotation.y += (baseY - d.group.rotation.y) * (dt * 6.5);
+        d.group.rotation.y = THREE.MathUtils.damp(d.group.rotation.y, baseY, 6.5, dt);
 
         // ── Interactive Hover Tilt Physics ──────────────────────────────────
         const isHovered = d.index === hoveredIndex;
         const targetHover = isHovered ? 1 : 0;
-        d.hoverFactor += (targetHover - d.hoverFactor) * Math.min(1, dt * 8);
+        d.hoverFactor = THREE.MathUtils.damp(d.hoverFactor, targetHover, 8, dt);
 
         // Disc smoothly angles towards cursor when hovered
         const targetTiltX = isHovered ? -mouseNY * A24.hoverTiltStrength : 0;
         const targetTiltY = isHovered ? mouseNX * A24.hoverTiltStrength : 0;
-        d.hoverTiltX += (targetTiltX - d.hoverTiltX) * (dt * 7);
-        d.hoverTiltY += (targetTiltY - d.hoverTiltY) * (dt * 7);
+        d.hoverTiltX = THREE.MathUtils.damp(d.hoverTiltX, targetTiltX, 7, dt);
+        d.hoverTiltY = THREE.MathUtils.damp(d.hoverTiltY, targetTiltY, 7, dt);
 
         // Apply interactive mouse spin & hover tilt directly to spinGroup
         d.spinGroup.rotation.y = d.spinY + d.hoverTiltY;
@@ -988,6 +1002,15 @@ export default function VaultClient() {
     { key: "books", label: "Books" },
     { key: "art", label: "Art" },
   ];
+
+  if (selectedCategory === "books") {
+    return (
+      <StripePressBooks
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+    );
+  }
 
   if (selectedCategory === "music") {
     if (musicMedium === "vinyl") {

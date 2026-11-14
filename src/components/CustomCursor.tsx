@@ -10,26 +10,25 @@ export default function CustomCursor() {
     const cursor = cursorRef.current;
     if (!cursor) return;
 
+    const xTo = gsap.quickTo(cursor, "x", { duration: 0.35, ease: "power3.out" });
+    const yTo = gsap.quickTo(cursor, "y", { duration: 0.35, ease: "power3.out" });
+
     const onMouseMove = (e: MouseEvent) => {
-      gsap.to(cursor, {
-        x: e.clientX - 10,
-        y: e.clientY - 10,
-        duration: 0.5,
-        ease: "power3.out",
-      });
+      xTo(e.clientX - 10);
+      yTo(e.clientY - 10);
     };
 
     const onMouseDown = () => {
-      gsap.to(cursor, { scale: 1.5, duration: 0.3 });
+      gsap.to(cursor, { scale: 1.5, duration: 0.25, overwrite: "auto" });
     };
 
     const onMouseUp = () => {
-      gsap.to(cursor, { scale: 1, duration: 0.3 });
+      gsap.to(cursor, { scale: 1, duration: 0.25, overwrite: "auto" });
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("mousedown", onMouseDown, { passive: true });
+    window.addEventListener("mouseup", onMouseUp, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
