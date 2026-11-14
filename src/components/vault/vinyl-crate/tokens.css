@@ -1,22 +1,9 @@
 /* ============================================================================
    VinylCrate: design tokens
-   susanoo.ui
-   ----------------------------------------------------------------------------
-   Every colour, size, radius, easing and type setting the component reads.
-   Change a value here to retheme it; VinylCrate.css never hard-codes these.
-
-   Tokens are scoped to .vinyl-crate-root, so they can't clash with your
-   app's own custom properties. Light is the default; put data-theme="dark"
-   on any ancestor (usually <html>) for the dark section.
-
-   The crate, the sleeves and the records are monochrome in both themes. Three
-   r, g, b tokens tint them: --vc-art-ink-rgb (the generated sleeve art),
-   --vc-vinyl-rgb (coloured vinyl) and --vc-crate-rgb (the wood).
+   susanoo.ui — Enhanced Audiophile Edition
    ============================================================================ */
 
 /* ---------- Fonts (self-hosted) ---------- */
-/* Geist + Geist Mono, served from ./fonts. No third-party requests. Variable
-   files cover every weight. SIL Open Font License, see ./fonts/OFL.txt. */
 @font-face {
   font-family: "Geist";
   src: url('./fonts/Geist-Variable.woff2') format('woff2');
@@ -33,63 +20,58 @@
 }
 
 /* ---------- Light (default) ---------- */
-/* Monochrome: ink on paper. */
 .vinyl-crate-root {
   /* Action: the Open button, the details link, focus ring */
-  --accent-primary: #16121f;
-  --accent-hover: #2b2440;
+  --accent-primary: #141218;
+  --accent-hover: #d14836;
   --text-on-accent: #fbfbfd;
 
   /* Surfaces */
   --bg-canvas: #f2f2f2;
   --bg-elevated-1: #ffffff;
-  --border-default: #e2e0e7;
-  --border-strong: #cfccd6;
+  --border-default: #dcd9e2;
+  --border-strong: #c2becb;
 
   /* Text */
-  --text-primary: #16121f;
-  --text-secondary: #4b4559;
-  --text-tertiary: #6a6578;
+  --text-primary: #141218;
+  --text-secondary: #433e4f;
+  --text-tertiary: #686276;
 
   /* Status */
   --error: #d1342c;
 
-  /* The crate: sanded wood, as r, g, b. Faces are this colour, darkened
-     inside the crate and lit along the edges. Try 150, 110, 70 for pine. */
-  --vc-crate-rgb: 196, 193, 200;
-  --vc-crate-grain: 0.75;          /* how strong the grain is, 0 to 1 */
-  --vc-crate-inside: 0.34;         /* how much darker the inside of the crate is */
+  /* The crate: warm handcrafted Baltic birch / walnut wood, as r, g, b. */
+  --vc-crate-rgb: 164, 120, 78;
+  --vc-crate-grain: 0.88;          /* how strong the wood grain is, 0 to 1 */
+  --vc-crate-inside: 0.42;         /* how much darker the inside of the crate is */
 
-  /* Generated sleeve art: two tones and a grey between them. Only used for
-     items without a cover image. --vc-art-ink-rgb tints every cover at once. */
-  --vc-art-paper: #f3f2f5;
+  /* Generated sleeve art defaults */
+  --vc-art-paper: #f5f2eb;
   --vc-art-ink-rgb: 20, 17, 26;
   --vc-art-mid: #8d8995;
 
   /* The back of a sleeve (seen on the flipped pile) */
-  --vc-sleeve-back: #e4e2e8;
-  --vc-sleeve-back-ink: #5d5868;
-  --vc-sleeve-edge: #f7f6f9;
+  --vc-sleeve-back: #eae6dd;
+  --vc-sleeve-back-ink: #3c3846;
+  --vc-sleeve-edge: #fbf9f4;
 
-  /* The record: vinyl as r, g, b (try 180, 30, 40 for red vinyl), and the
-     paper label in its centre. */
-  --vc-vinyl-rgb: 17, 16, 20;
-  --vc-label: #f3f2f5;
-  --vc-label-ink: #16121f;
+  /* The record: heavyweight 180g vinyl as r, g, b, and center label */
+  --vc-vinyl-rgb: 16, 15, 19;
+  --vc-label: #f4f1ea;
+  --vc-label-ink: #141218;
 
-  /* Size of a record sleeve at full size. The crate and everything in it
-     scale with this, and shrink to fit narrow containers. */
-  --vc-sleeve-size: 320px;
+  /* Larger 12-inch sleeve size for commanding stage presence */
+  --vc-sleeve-size: 420px;
 
-  /* Shadows: one r, g, b and strength for everything the crate casts */
-  --shadow-rgb: 14, 10, 22;
-  --shadow-strength: 0.26;
-  --shadow-panel: 0 18px 50px rgba(14, 10, 22, 0.12), 0 0 0 1px var(--border-default);
-  --shadow-focus-ring: 0 0 0 2px var(--bg-canvas), 0 0 0 4px #16121f;
+  /* Shadows */
+  --shadow-rgb: 18, 12, 8;
+  --shadow-strength: 0.34;
+  --shadow-panel: 0 24px 64px rgba(14, 10, 22, 0.16), 0 0 0 1px var(--border-default);
+  --shadow-focus-ring: 0 0 0 2px var(--bg-canvas), 0 0 0 4px #141218;
 
   /* Shape + motion */
   --radius-md: 10px;
-  --radius-panel: 18px;
+  --radius-panel: 20px;
   --radius-pill: 999px;
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 
@@ -102,8 +84,6 @@
 }
 
 /* ---------- Dark ---------- */
-/* Off-white on a violet-black. The crate turns to charcoal wood; the
-   records stay black. */
 [data-theme="dark"] .vinyl-crate-root {
   --accent-primary: #fbfbfd;
   --accent-hover: #e6e4ec;
@@ -120,9 +100,9 @@
 
   --error: #f0736b;
 
-  --vc-crate-rgb: 72, 69, 78;
-  --vc-crate-grain: 1;
-  --vc-crate-inside: 0.5;
+  --vc-crate-rgb: 92, 68, 48;
+  --vc-crate-grain: 0.95;
+  --vc-crate-inside: 0.52;
 
   --vc-art-paper: #ecebef;
   --vc-art-ink-rgb: 18, 15, 23;

@@ -11,7 +11,7 @@ if (typeof window !== "undefined") {
 
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    function update(time: number) {
+    function update() {
       ScrollTrigger.update();
     }
 

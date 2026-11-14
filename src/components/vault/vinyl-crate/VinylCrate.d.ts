@@ -4,7 +4,26 @@ export interface VinylRecord {
   id: string;
   title: string;
   subtitle?: string;
+  creator?: string;
+  year?: string;
+  genre?: string;
   description?: string;
+  favoriteHighlight?: string;
+  reviewPublication?: string;
+  reviewTestimonial?: string;
+  reviewStars?: number;
+  vinylColor?: string;
+  labelColor?: string;
+  accentColor?: string;
+  chordFreqs?: number[];
+  epVisualizer?: {
+    front: string;
+    back: string;
+    aSide: string;
+    bSide: string;
+    background?: string;
+    extractedBackground?: string;
+  };
   cover?: string;
   href?: string;
   cta?: string;
@@ -26,4 +45,3 @@ export interface VinylCrateProps {
 
 declare const VinylCrate: ComponentType<VinylCrateProps>;
 export default VinylCrate;
-

@@ -334,7 +334,7 @@ export default function AshfallGallery() {
     };
 
     // CLICK EVENT
-    const onClick = (e: MouseEvent) => {
+    const onClick = () => {
       if (Math.abs(dragVelocityX) > 0.005) return;
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(cardMeshes, false);
@@ -368,11 +368,11 @@ export default function AshfallGallery() {
 
     // ANIMATION LOOP — OPTIMIZED 60-120 FPS
     let animId: number;
-    let clock = new THREE.Clock();
+    const startTime = performance.now();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      const elapsedTime = (performance.now() - startTime) * 0.001;
 
       // Dual counter-rotation
       groupA.rotation.y += 0.0005;

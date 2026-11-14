@@ -1,18 +1,7 @@
-/* VinylCrate.css: a project carousel you flip through like records in a crate.
-   susanoo.ui
-   ------------------------------------------------------------------------
-   An optional heading, the crate, and a bar of controls under it. The
-   crate's walls and the sleeves are flat elements that JS moves into place
-   in 3D (each carries its own perspective, so nothing depends on the
-   browser sorting 3D layers); this file draws them. Colours, sizes and
-   shadows come from tokens.css.
-
-   Everything is scoped under .vinyl-crate-root: no bare body/html/* rules,
-   so nothing leaks into the rest of your app.
+/* VinylCrate.css: Audiophile 3D Record Crate & Interactive Turntable
+   susanoo.ui — Enhanced for AdityaWorks Vault
    ============================================================================ */
 
-/* Scoped reset: zero specificity via :where(), so the component renders the
-   same whether or not your app has its own CSS reset. */
 :where(.vinyl-crate-root, .vinyl-crate-root *, .vinyl-crate-root *::before, .vinyl-crate-root *::after) {
   box-sizing: border-box;
 }
@@ -23,9 +12,8 @@
   width: 100%;
   container-type: inline-size;
   position: relative;
-  /* Set --vc-section-padding on this element or any ancestor to change it. */
-  padding: var(--vc-section-padding, clamp(40px, 7vw, 88px) clamp(16px, 4vw, 40px));
-  overflow: hidden;            /* the crate's perspective never makes the page scroll sideways */
+  padding: var(--vc-section-padding, 6px clamp(16px, 3vw, 36px) 16px);
+  overflow: hidden;
   color: var(--text-primary);
   background: var(--bg-canvas);
   font-family: var(--font-sans);
@@ -35,7 +23,7 @@
 
 .vc-inner {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1320px;
   margin-inline: auto;
 }
 
@@ -53,40 +41,37 @@
 
 /* ============================== HEADING ============================== */
 .vc-head {
-  margin-bottom: clamp(8px, 2cqi, 20px);
+  margin-bottom: 4px;
   text-align: center;
 }
 .vc-eyebrow {
-  margin-bottom: 14px;
+  margin-bottom: 6px;
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text-tertiary);
 }
 .vc-title {
-  font-size: clamp(28px, 4.4cqi, 44px);
-  font-weight: 600;
-  line-height: 1.06;
+  font-size: clamp(24px, 3.2cqi, 36px);
+  font-weight: 700;
+  line-height: 1.05;
   letter-spacing: var(--tr-display);
   text-wrap: balance;
 }
 .vc-desc {
-  max-width: 46ch;
-  margin: 14px auto 0;
-  font-size: 15.5px;
-  line-height: 1.55;
+  max-width: 48ch;
+  margin: 8px auto 0;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--text-secondary);
   text-wrap: pretty;
 }
 
 /* =============================== STAGE =============================== */
-/* The wrapper takes the page's width; the stage inside it is laid out in
-   crate units and scaled to fit (both set from JS). Vertical swipes on a
-   touch screen stay with the page; sideways ones flip. */
 .vc-wrap {
   position: relative;
-  height: 520px;               /* replaced by the measured height */
+  height: 580px;
   touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
@@ -96,7 +81,6 @@
 .vc-wrap.is-dragging,
 .vc-wrap.is-dragging .vc-sleeve { cursor: grabbing; }
 
-/* Measures --vc-sleeve-size in whatever unit it's given. */
 .vc-probe {
   position: absolute;
   width: var(--vc-sleeve-size);
@@ -114,8 +98,6 @@
 }
 .vc-stage.is-ready { visibility: visible; }
 
-/* The listbox holds the sleeves but adds no stacking context (no z-index,
-   no transform), so its sleeves paint between the crate's walls. */
 .vc-crate {
   position: absolute;
   inset: 0;
@@ -126,7 +108,13 @@
   position: absolute;
   z-index: 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.1)), rgba(var(--shadow-rgb), 0) 100%);
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.25)),
+    rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 0.45)) 55%,
+    rgba(var(--shadow-rgb), 0) 100%
+  );
+  filter: blur(6px);
   pointer-events: none;
 }
 
@@ -134,10 +122,10 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 4px;
+  bottom: 2px;
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-align: center;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -147,22 +135,185 @@
 }
 .vc-hint.is-on { opacity: 1; }
 
-/* Dims the crate behind a record that's been taken out, to 93%. JS sets its
-   opacity; it lets clicks through (a click anywhere puts the record back). */
 .vc-scrim {
   position: absolute;
-  inset: 0 -400px;
+  inset: 0 -500px;
   z-index: 800;
   background: var(--bg-canvas);
   opacity: 0;
   pointer-events: none;
 }
 
-/* =============================== CRATE =============================== */
-/* Wood in the --vc-crate-rgb colour. The grain is fractal noise stretched
-   along the planks, dark streaks and light ones, on its own layer so
-   --vc-crate-grain can turn it up or down. Faces inside the crate are
-   shaded; the top edges of the walls catch the light. */
+/* ======== INTERACTIVE EP VISUALIZER: DYNAMIC LIGHT RAYS & HOTZONES ======== */
+.vc-ep-rays {
+  position: absolute;
+  inset: -40px -240px;
+  z-index: 805;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 450ms ease;
+  background:
+    radial-gradient(
+      circle at calc(var(--vc-mx, 0.5) * 100%) calc(var(--vc-my, 0.5) * 100%),
+      rgba(255, 255, 255, 0.28) 0%,
+      transparent 52%
+    ),
+    conic-gradient(
+      from calc(var(--vc-mx, 0.5) * 360deg) at calc(var(--vc-mx, 0.5) * 100%) calc(var(--vc-my, 0.5) * 100%),
+      transparent 0deg,
+      var(--vc-ep-light, rgba(232, 176, 75, 0.16)) 30deg,
+      transparent 60deg,
+      var(--vc-ep-light, rgba(232, 176, 75, 0.16)) 90deg,
+      transparent 120deg,
+      var(--vc-ep-light, rgba(232, 176, 75, 0.16)) 150deg,
+      transparent 180deg
+    );
+}
+.vc-wrap.is-open .vc-ep-rays {
+  opacity: 0.85;
+}
+
+.vc-ep-spotlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 560px;
+  height: 560px;
+  z-index: 806;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    var(--vc-ep-glow, rgba(232, 176, 75, 0.24)) 0%,
+    rgba(232, 176, 75, 0.08) 35%,
+    transparent 65%
+  );
+  filter: blur(22px);
+  pointer-events: none;
+  opacity: 0;
+  animation: vc-ep-pulse 3s ease-in-out infinite;
+}
+.vc-wrap.is-open .vc-ep-spotlight {
+  opacity: 1;
+}
+@keyframes vc-ep-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.06); }
+}
+
+/* 10% lateral flip zone highlight bars (exact kaleidoscopic-halva-b45fb2.netlify.app style) */
+.vc-ep-border-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10%;
+  z-index: 840;
+  pointer-events: none;
+  background: transparent;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.vc-ep-border-zone.is-left {
+  left: 0;
+  border-right: 1px solid transparent;
+}
+.vc-ep-border-zone.is-right {
+  right: 0;
+  border-left: 1px solid transparent;
+}
+.vc-ep-border-zone.is-active {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.28);
+}
+
+/* Left & Right Minimalist Consolas Black HUD Boxes (kaleidoscopic-halva-b45fb2.netlify.app) */
+.vc-ep-hud-left {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 880;
+  max-width: 310px;
+  font-family: Consolas, var(--font-mono), monospace;
+  pointer-events: auto;
+}
+.vc-ep-hud-title {
+  font-size: clamp(1.05rem, 2.2vw, 1.65rem);
+  width: max-content;
+  max-width: 320px;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  font-family: Consolas, var(--font-mono), monospace;
+  color: #fff;
+  background-color: #000;
+  padding: 10px 12px;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.vc-ep-hud-sub {
+  font-size: clamp(0.78rem, 1.5vw, 1rem);
+  margin-bottom: 0.75rem;
+  opacity: 0.92;
+  font-family: Consolas, var(--font-mono), monospace;
+  color: #fff;
+  background-color: #000;
+  padding: 8px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+.vc-ep-hud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.vc-ep-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: Consolas, var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff;
+  background-color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 7px 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.vc-ep-hud-btn:hover {
+  background-color: #1f1f24;
+  transform: translateY(-1px);
+}
+.vc-ep-hud-btn.is-active {
+  background-color: #d14836;
+  border-color: #d14836;
+}
+
+.vc-ep-hud-right {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 880;
+  font-size: 0.82rem;
+  opacity: 0.82;
+  text-align: right;
+  line-height: 1.65;
+  font-family: Consolas, var(--font-mono), monospace;
+  color: #fff;
+  background-color: #000;
+  padding: 10px 14px;
+  border-radius: 4px;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* =============================== CRATE (REAL WOOD & JOINERY) =============================== */
 .vc-plane {
   position: absolute;
   left: 0;
@@ -182,39 +333,81 @@
 }
 .vc-p-rim .vc-grain { background-size: 520px 60px; }
 
-/* Inside faces: shaded, darker towards the bottom where less light gets in. */
+/* Inside faces: shaded, darker towards the bottom */
 .vc-p-back,
-.vc-p-right { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, var(--vc-crate-inside)); }
-.vc-p-floor { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, calc(var(--vc-crate-inside) * 1.5)); }
+.vc-p-right { box-shadow: inset 0 0 0 999px rgba(18, 10, 4, var(--vc-crate-inside)); }
+.vc-p-floor { box-shadow: inset 0 0 0 999px rgba(12, 6, 2, calc(var(--vc-crate-inside) * 1.55)); }
 .vc-p-back::after,
 .vc-p-right::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, calc(var(--vc-crate-inside) * 0.6)));
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, calc(var(--vc-crate-inside) * 0.75)));
 }
-/* The near wall, seen from outside: a touch darker than the front, which
-   faces the light. */
-.vc-p-left { box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.16), inset -2px 0 0 rgba(255, 255, 255, 0.18); }
-/* Plank seams on the walls. */
+/* Near wall seen from outside */
+.vc-p-left {
+  box-shadow:
+    inset 0 0 0 999px rgba(0, 0, 0, 0.2),
+    inset -2px 0 0 rgba(255, 240, 215, 0.22),
+    inset 2px 0 6px rgba(0, 0, 0, 0.25);
+}
+/* Plank seams on the walls */
 .vc-p-side::before,
 .vc-p-back::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(180deg, transparent 0 60px, rgba(0, 0, 0, 0.3) 60px 61.5px, rgba(255, 255, 255, 0.1) 61.5px 62.5px);
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 58px,
+    rgba(20, 10, 2, 0.38) 58px 60px,
+    rgba(255, 235, 205, 0.14) 60px 61px
+  );
 }
-/* Top edges: lit from above. */
-.vc-p-rim { box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.2); }
-.vc-p-rim-front { box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.26), inset 0 -1px 0 rgba(0, 0, 0, 0.25); }
-
-/* The front: two planks with a seam between them, a routed hand hold, a
-   soft round-over on the top edge and a shadow along the bottom. */
-.vc-p-front {
-  border-radius: 0 0 3px 3px;
+/* Top edges: warm wood highlight */
+.vc-p-rim { box-shadow: inset 0 0 0 999px rgba(255, 242, 220, 0.25); }
+.vc-p-rim-front {
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -10px 16px -8px rgba(0, 0, 0, 0.35);
+    inset 0 0 0 999px rgba(255, 244, 224, 0.32),
+    inset 0 -1px 0 rgba(30, 14, 4, 0.35);
+}
+
+/* Front plank with brass corner rivets & stenciled crate mark */
+.vc-p-front {
+  border-radius: 0 0 4px 4px;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 245, 225, 0.42),
+    inset 0 -12px 18px -8px rgba(20, 8, 0, 0.45),
+    inset 12px 0 0 -10px rgba(0, 0, 0, 0.25),
+    inset -12px 0 0 -10px rgba(0, 0, 0, 0.25);
+}
+.vc-p-front::before {
+  content: 'ADITYAWORKS // ARCHIVE CRATE NO. 04 · 33⅓ RPM LP';
+  position: absolute;
+  left: 16px;
+  bottom: 7px;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: rgba(28, 14, 4, 0.52);
+  text-shadow: 0 1px 0 rgba(255, 245, 220, 0.25);
+  pointer-events: none;
+}
+.vc-p-front::after {
+  content: 'STEREO · 180G';
+  position: absolute;
+  right: 16px;
+  bottom: 7px;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(28, 14, 4, 0.48);
+  padding: 1px 5px;
+  border: 1px solid rgba(28, 14, 4, 0.32);
+  border-radius: 2px;
+  pointer-events: none;
 }
 .vc-seam {
   position: absolute;
@@ -222,30 +415,26 @@
   right: 0;
   top: 50px;
   height: 2.5px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.12) 60%, rgba(255, 255, 255, 0.18));
+  background: linear-gradient(180deg, rgba(15, 6, 0, 0.48), rgba(15, 6, 0, 0.14) 60%, rgba(255, 242, 220, 0.22));
 }
-/* Hand holds: slots right through the wood. From outside they look into
-   the dark of the crate; the far wall's, seen from inside, shows the page
-   behind it. */
 .vc-handle {
   position: absolute;
   height: 22px;
   border-radius: 11px;
-  background: rgba(0, 0, 0, 0.78);
-  box-shadow: inset 0 4px 3px rgba(0, 0, 0, 0.55), inset 0 -1.5px 0 rgba(255, 255, 255, 0.16), 0 1px 0 rgba(255, 255, 255, 0.12);
+  background: rgba(14, 10, 8, 0.84);
+  box-shadow:
+    inset 0 4px 4px rgba(0, 0, 0, 0.68),
+    inset 0 -1.5px 0 rgba(255, 240, 215, 0.22),
+    0 1px 0 rgba(255, 245, 225, 0.18);
 }
-.vc-p-front .vc-handle { left: 50%; top: 14px; width: 96px; margin-left: -48px; }
+.vc-p-front .vc-handle { left: 50%; top: 14px; width: 102px; margin-left: -51px; }
 .vc-p-side .vc-handle { left: 12%; top: 58px; width: 30%; height: 24px; border-radius: 12px; }
 .vc-p-right .vc-handle {
   background: var(--bg-canvas);
-  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.35), inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.4), inset 0 -2px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* =============================== SLEEVE =============================== */
-/* A 300 x 300 square moved into place by JS. It keeps its children in 3D
-   so the cover, the back, the top edge and the record can each face their
-   own way. --vc-hide clips off the bottom that's always behind the front
-   wall, so a sleeve tipping over the wall never paints over it. */
 .vc-sleeve {
   position: absolute;
   left: 0;
@@ -264,15 +453,23 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   clip-path: inset(-10px -10px var(--vc-hide, 46px) -10px);
+  border-radius: 2px;
 }
-.vc-front { transform: translateZ(0.8px); }
+.vc-front {
+  transform: translateZ(1px);
+  overflow: visible;
+}
 .vc-back {
-  transform: translateZ(-0.8px) rotateX(180deg);
+  transform: translateZ(-1px) rotateX(180deg);
   background: var(--vc-sleeve-back);
-  /* Turned over, so the sleeve's bottom is this face's top. */
   clip-path: inset(var(--vc-hide, 46px) -10px -10px -10px);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
 }
-.vc-front { overflow: visible; }
+/* When user flips the pulled-out sleeve to inspect the back cover */
+.vc-sleeve.is-flipped .vc-back {
+  transform: translateZ(-1px) rotateY(180deg);
+  clip-path: inset(-10px -10px -10px -10px);
+}
 .vc-front > .vc-art,
 .vc-front > .vc-cover {
   position: absolute;
@@ -280,6 +477,7 @@
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: 2px;
 }
 .vc-cover { object-fit: cover; }
 .vc-back-art {
@@ -288,58 +486,71 @@
   height: 100%;
 }
 
-/* Light and shade: the shade goes darker as a sleeve stands further back
-   or turns away from the light (set per sleeve from JS). */
+/* Light and shade */
 .vc-shade {
   position: absolute;
   inset: 0;
   background: #000;
   pointer-events: none;
+  border-radius: 2px;
 }
 .vc-front > .vc-shade { opacity: var(--vc-shade-front, 0); }
 .vc-back > .vc-shade { opacity: var(--vc-shade-back, 0); }
 
-/* Cardboard: a faint ring worn into the sleeve by the record inside, a
-   sheen across it, and a crisp edge. */
+/* Realistic vintage vinyl ring-wear & spine pinch */
 .vc-wear {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, transparent 0 45.2%, rgba(255, 255, 255, 0.05) 46%, transparent 47.2%),
-    radial-gradient(circle at 50% 50%, transparent 0 46.4%, rgba(0, 0, 0, 0.04) 47.1%, transparent 48%);
+    radial-gradient(circle at 50% 50%, transparent 0 44.8%, rgba(255, 255, 255, 0.08) 45.8%, transparent 47%),
+    radial-gradient(circle at 50% 50%, transparent 0 46.2%, rgba(0, 0, 0, 0.07) 47%, transparent 48.2%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0, rgba(0, 0, 0, 0.14) 5px, transparent 10px, transparent calc(100% - 6px), rgba(0, 0, 0, 0.1) 100%);
   pointer-events: none;
+  border-radius: 2px;
 }
+/* Cellophane shrink-wrap specular sheen (mouse-reactive) */
 .vc-gloss {
   position: absolute;
   inset: 0;
-  background: linear-gradient(128deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.06));
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background:
+    linear-gradient(
+      calc(45deg + var(--vc-mx, 0.5) * 90deg),
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.1) 28%,
+      rgba(255, 255, 255, 0) 48%,
+      rgba(255, 255, 255, 0.08) 72%,
+      rgba(255, 255, 255, 0.22) 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.45);
   pointer-events: none;
+  border-radius: 2px;
 }
-/* The top edge of the sleeve: a strip of cardboard, seen from above. */
+/* The top edge of the sleeve: thick printed cardboard spine */
 .vc-edge {
   position: absolute;
   left: 0;
   right: 0;
-  top: -1.5px;
-  height: 3px;
+  top: -1.8px;
+  height: 3.6px;
   background: var(--vc-sleeve-edge);
-  box-shadow: inset 0 0 0 99px rgba(0, 0, 0, var(--vc-shade-edge, 0));
+  box-shadow:
+    inset 0 0 0 99px rgba(0, 0, 0, var(--vc-shade-edge, 0)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transform: rotateX(90deg);
 }
 
-/* A lifted sleeve casts a shadow (JS sets --vc-lift, 0..1). It sits just
-   behind the faces, outside their clip. */
 .vc-drop {
   position: absolute;
   inset: 0;
-  transform: translateZ(-1.6px);
+  transform: translateZ(-1.8px);
   box-shadow:
-    0 34px 60px -12px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.5 * var(--vc-lift, 0))),
-    0 10px 20px -6px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 0.8 * var(--vc-lift, 0)));
+    0 38px 68px -12px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 1.65 * var(--vc-lift, 0))),
+    0 14px 26px -6px rgba(var(--shadow-rgb), calc(var(--shadow-strength) * 0.9 * var(--vc-lift, 0)));
   pointer-events: none;
 }
-/* Keyboard focus rings the sleeve at the front. */
+
 .vc-front::after {
   content: '';
   position: absolute;
@@ -352,7 +563,7 @@
 }
 .vc-crate:focus-visible .vc-sleeve.is-front .vc-front::after { opacity: 1; }
 
-/* Generated art: two tones that swap on dark sleeves. */
+/* Generated art */
 .vc-art {
   --a-bg: var(--vc-art-paper);
   --a-fg: rgb(var(--vc-art-ink-rgb));
@@ -373,22 +584,24 @@
 }
 .vc-a-m {
   font-family: var(--font-mono);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.06em;
 }
 .vc-b-t {
   font-family: var(--font-sans);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  fill: var(--vc-sleeve-back-ink);
+}
+.vc-b-m {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.08em;
   fill: var(--vc-sleeve-back-ink);
 }
 .vc-b-ink { fill: var(--vc-sleeve-back-ink); }
 
-/* =============================== RECORD =============================== */
-/* Sits between the sleeve's front and back; JS slides it out to the right.
-   The grooves and the label turn; the sheen, like a real reflection,
-   stays where it is. The grooves are a soft ring every 3.6px: any finer
-   and they shimmer (moire) on 1x screens. */
+/* =============================== RECORD (180G AUDIOPHILE VINYL) =============================== */
 .vc-record {
   position: absolute;
   left: 9px;
@@ -396,34 +609,72 @@
   width: 282px;
   height: 282px;
   border-radius: 50%;
-  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
+  box-shadow:
+    0 22px 46px -8px rgba(0, 0, 0, 0.65),
+    0 6px 16px rgba(0, 0, 0, 0.38);
+  cursor: grab;
+  pointer-events: auto;
+}
+.vc-record:active {
+  cursor: grabbing;
+}
+/* 3D 180g Vinyl Rim Thickness */
+.vc-vinyl-edge {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, transparent 0%, #111 82%, #000 100%);
+  transform: translateZ(-2px);
+  box-shadow:
+    0 0 0 2px #262626,
+    0 0 0 4px #0c0c0c;
+  pointer-events: none;
 }
 .vc-record-spin {
   position: absolute;
   inset: 0;
   border-radius: 50%;
+  transform-style: preserve-3d;
+}
+.vc-record-side {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.vc-record-side.is-side-a {
+  transform: translateZ(1.5px);
+}
+.vc-record-side.is-side-b {
+  transform: rotateY(180deg) translateZ(1.5px);
 }
 .vc-vinyl {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgb(var(--vc-vinyl-rgb)) 0 18.6%, transparent 18.8%),
-    radial-gradient(circle, transparent 0 34%, rgba(255, 255, 255, 0.07) 34.3%, transparent 35%),
-    radial-gradient(circle, transparent 0 51%, rgba(255, 255, 255, 0.06) 51.4%, transparent 52.2%),
-    radial-gradient(circle, transparent 0 66%, rgba(255, 255, 255, 0.06) 66.4%, transparent 67.2%),
-    radial-gradient(circle, transparent 0 81%, rgba(255, 255, 255, 0.06) 81.4%, transparent 82.2%),
-    radial-gradient(circle, transparent 0 95.6%, rgba(255, 255, 255, 0.14) 96.4%, transparent 97.6%, rgba(0, 0, 0, 0.4) 99%),
-    repeating-radial-gradient(circle, rgba(255, 255, 255, 0.04) 0, rgba(255, 255, 255, 0) 1.8px, rgba(255, 255, 255, 0.04) 3.6px),
-    rgb(var(--vc-vinyl-rgb));
+    radial-gradient(circle, var(--record-vinyl-color, rgb(var(--vc-vinyl-rgb))) 0 18.6%, transparent 18.8%),
+    /* Runout groove matrix ring */
+    radial-gradient(circle, transparent 0 21.5%, rgba(255, 255, 255, 0.11) 21.8%, transparent 22.3%),
+    /* Track gap rings */
+    radial-gradient(circle, transparent 0 34%, rgba(255, 255, 255, 0.09) 34.3%, rgba(0, 0, 0, 0.35) 34.7%, transparent 35.1%),
+    radial-gradient(circle, transparent 0 49%, rgba(255, 255, 255, 0.08) 49.3%, rgba(0, 0, 0, 0.35) 49.7%, transparent 50.2%),
+    radial-gradient(circle, transparent 0 64%, rgba(255, 255, 255, 0.08) 64.4%, rgba(0, 0, 0, 0.35) 64.8%, transparent 65.2%),
+    radial-gradient(circle, transparent 0 79%, rgba(255, 255, 255, 0.08) 79.4%, rgba(0, 0, 0, 0.35) 79.8%, transparent 80.2%),
+    /* Outer lead-in bevel highlight */
+    radial-gradient(circle, transparent 0 95.5%, rgba(255, 255, 255, 0.22) 96.4%, transparent 97.6%, rgba(0, 0, 0, 0.55) 99.2%),
+    /* Fine micro-grooves */
+    repeating-radial-gradient(circle, rgba(255, 255, 255, 0.048) 0, rgba(255, 255, 255, 0) 1.5px, rgba(0, 0, 0, 0.16) 2.4px, rgba(255, 255, 255, 0.045) 3.2px),
+    var(--record-vinyl-color, rgb(var(--vc-vinyl-rgb)));
 }
-/* A faint scuff that turns with the record, so the spin reads even where
-   the grooves look the same all the way round. */
 .vc-scuff {
   position: absolute;
-  inset: 22%;
+  inset: 21%;
   border-radius: 50%;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.09);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
   transform: rotate(-24deg);
 }
 .vc-label {
@@ -432,42 +683,62 @@
   top: 32%;
   width: 36%;
   height: 36%;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
 }
-.vc-l-paper { fill: var(--vc-label); }
-.vc-l-line { stroke: var(--vc-label-ink); opacity: 0.4; }
+.vc-l-paper { fill: var(--record-label-color, var(--vc-label)); }
+.vc-l-paper-b { fill: #151419; }
+.vc-l-line { stroke: var(--vc-label-ink); opacity: 0.45; }
 .vc-l-ink { fill: var(--vc-label-ink); }
 .vc-l-title {
   fill: var(--vc-label-ink);
   font-family: var(--font-sans);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.07em;
 }
 .vc-l-sub,
 .vc-l-rpm {
   fill: var(--vc-label-ink);
   font-family: var(--font-mono);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
-  opacity: 0.7;
+  opacity: 0.78;
 }
 .vc-l-hole { fill: #0b0a0d; }
+/* Anisotropic rainbow + mouse-tracked radial specular vinyl sheen */
 .vc-sheen {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background:
-    conic-gradient(from 205deg, transparent 0deg, rgba(255, 255, 255, 0.14) 24deg, transparent 58deg,
-      transparent 180deg, rgba(255, 255, 255, 0.1) 204deg, transparent 238deg);
-  -webkit-mask: radial-gradient(circle, transparent 0 19%, #000 19.5%);
-  mask: radial-gradient(circle, transparent 0 19%, #000 19.5%);
+    radial-gradient(
+      ellipse at calc(var(--vc-mx, 0.5) * 100%) calc(var(--vc-my, 0.5) * 100%),
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.14) 22%,
+      rgba(255, 255, 255, 0.03) 42%,
+      transparent 62%
+    ),
+    conic-gradient(
+      from calc(180deg + var(--vc-mx, 0.5) * 60deg),
+      transparent 0deg,
+      rgba(255, 255, 255, 0.22) 20deg,
+      rgba(200, 230, 255, 0.12) 32deg,
+      rgba(255, 200, 220, 0.08) 44deg,
+      transparent 64deg,
+      transparent 178deg,
+      rgba(255, 255, 255, 0.18) 200deg,
+      rgba(255, 235, 190, 0.1) 214deg,
+      transparent 244deg
+    );
+  -webkit-mask: radial-gradient(circle, transparent 0 18.8%, #000 19.4%);
+  mask: radial-gradient(circle, transparent 0 18.8%, #000 19.4%);
   pointer-events: none;
 }
 
-/* ============================== DETAILS ============================== */
+/* ============================== DETAILS & TURNTABLE HUD ============================== */
 .vc-details {
   position: absolute;
-  z-index: 2;
-  padding: 26px 26px 24px;
+  z-index: 850;
+  padding: 24px 26px 22px;
   border-radius: var(--radius-panel);
   background: var(--bg-elevated-1);
   box-shadow: var(--shadow-panel);
@@ -478,8 +749,6 @@
   cursor: auto;
 }
 .vc-wrap.is-narrow .vc-details { left: 0; right: 0; }
-/* The panel takes focus so its title and text are read first; it isn't a
-   control itself, so it shows no ring. Its buttons do. */
 
 .vc-close {
   position: absolute;
@@ -487,59 +756,197 @@
   right: 14px;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: 1px solid var(--border-default);
   border-radius: 50%;
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: border-color 160ms var(--ease-out-quart), color 160ms var(--ease-out-quart);
+  transition: border-color 160ms var(--ease-out-quart), color 160ms var(--ease-out-quart), background 160ms var(--ease-out-quart);
 }
-.vc-close:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.vc-close:hover {
+  border-color: var(--border-strong);
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-primary);
+}
 
 .vc-d-meta {
   display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.12em;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-tertiary);
 }
-.vc-d-meta span::before { content: '\00b7'; margin-right: 10px; }
+.vc-d-meta span::before { content: '\00b7'; margin-right: 8px; }
+.vc-d-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(209, 72, 54, 0.1);
+  color: #d14836;
+  font-weight: 700;
+  font-size: 9.5px;
+}
+.vc-d-badge::before {
+  content: '' !important;
+  margin: 0 !important;
+}
+
 .vc-d-title {
-  padding-right: 44px;
-  font-size: clamp(24px, 3cqi, 30px);
-  font-weight: 600;
-  line-height: 1.1;
+  padding-right: 40px;
+  font-size: clamp(22px, 2.6cqi, 28px);
+  font-weight: 700;
+  line-height: 1.08;
   letter-spacing: var(--tr-display);
 }
 .vc-d-sub {
-  margin-top: 6px;
-  font-size: 14px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  font-weight: 500;
   color: var(--text-tertiary);
 }
 .vc-d-desc {
-  margin-top: 14px;
-  font-size: 15.5px;
-  line-height: 1.6;
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.58;
   color: var(--text-secondary);
   text-wrap: pretty;
 }
-.vc-d-actions { margin-top: 22px; }
+
+/* Highlight Track Box with Animated Equalizer */
+.vc-d-highlight {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f6f4ef;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.vc-d-hl-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.vc-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.vc-eq span {
+  width: 2.5px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d14836;
+  transition: height 150ms ease;
+}
+.vc-eq.is-playing span:nth-child(1) { animation: vc-eq-bar 0.55s ease-in-out infinite alternate; }
+.vc-eq.is-playing span:nth-child(2) { animation: vc-eq-bar 0.42s ease-in-out 0.12s infinite alternate; }
+.vc-eq.is-playing span:nth-child(3) { animation: vc-eq-bar 0.65s ease-in-out 0.24s infinite alternate; }
+.vc-eq.is-playing span:nth-child(4) { animation: vc-eq-bar 0.48s ease-in-out 0.08s infinite alternate; }
+
+@keyframes vc-eq-bar {
+  0% { height: 3px; }
+  100% { height: 14px; }
+}
+
+/* Interactive Turntable Controls inside Details Panel */
+.vc-turntable-controls {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.vc-tt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+  background: #faf9f6;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 150ms var(--ease-out-quart);
+}
+.vc-tt-btn:hover {
+  border-color: var(--border-strong);
+  background: #f0ede6;
+}
+.vc-tt-btn.is-active {
+  background: #d14836;
+  border-color: #d14836;
+  color: #ffffff;
+}
+.vc-tt-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.vc-tt-btn.is-active .vc-tt-dot {
+  background: #fff;
+  box-shadow: 0 0 6px #fff;
+}
+
+/* Review Acclaim Line */
+.vc-d-review {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-tertiary);
+}
+.vc-d-stars {
+  color: #d14836;
+  letter-spacing: 1px;
+  font-size: 11px;
+}
+
+.vc-d-actions {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 .vc-cta {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  height: 44px;
-  padding: 0 20px;
+  height: 40px;
+  padding: 0 18px;
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--accent-primary);
   color: var(--text-on-accent);
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: var(--tr-tight);
   text-decoration: none;
@@ -549,6 +956,14 @@
 .vc-cta:hover { background: var(--accent-hover); }
 .vc-cta:active { transform: scale(0.97); }
 .vc-cta[aria-busy] { cursor: progress; }
+.vc-scratch-tip {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
 .vc-spinner {
   width: 14px;
   height: 14px;
@@ -558,25 +973,76 @@
   animation: vc-spin 0.7s linear infinite;
 }
 .vc-d-error {
-  margin-top: 12px;
-  font-size: 13.5px;
+  margin-top: 10px;
+  font-size: 13px;
   line-height: 1.45;
   color: var(--error);
 }
 
-/* ============================== CONTROLS ============================= */
+/* ============================== CONTROLS & QUICK-JUMP STRIP ============================= */
 .vc-bar {
   transition: opacity 300ms var(--ease-out-quart);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-default);
+}
+.vc-bar-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px 20px;
-  margin-top: 14px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border-default);
 }
-/* Out of reach while a record is out, and it looks it. */
-.vinyl-crate-root:not([data-state="crate"]) .vc-bar { opacity: 0.35; }
+.vinyl-crate-root:not([data-state="crate"]) .vc-bar { opacity: 0.4; }
+
+/* Quick-Jump Crate Divider Strip */
+.vc-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.vc-strip::-webkit-scrollbar { display: none; }
+
+.vc-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 160ms var(--ease-out-quart);
+}
+.vc-tab:hover {
+  border-color: var(--border-strong);
+  background: #ffffff;
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+.vc-tab.is-active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+.vc-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
 .vc-now {
   display: flex;
@@ -587,11 +1053,11 @@
 .vc-count {
   flex: none;
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 13px;
   letter-spacing: 0.06em;
   color: var(--text-tertiary);
 }
-.vc-count b { font-weight: 600; color: var(--text-primary); }
+.vc-count b { font-weight: 700; color: var(--text-primary); }
 .vc-now-text {
   display: flex;
   flex-direction: column;
@@ -604,12 +1070,13 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.vc-now-title { font-size: 15px; font-weight: 600; letter-spacing: var(--tr-tight); }
+.vc-now-title { font-size: 16px; font-weight: 700; letter-spacing: var(--tr-tight); }
 .vc-now-sub { font-size: 13px; color: var(--text-tertiary); }
 
 .vc-buttons {
   display: flex;
   flex: none;
+  align-items: center;
   gap: 8px;
 }
 .vc-btn {
@@ -622,7 +1089,7 @@
   border-radius: var(--radius-pill);
   background: var(--bg-elevated-1);
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: var(--tr-tight);
   cursor: pointer;
@@ -634,7 +1101,7 @@
 .vc-btn[aria-disabled] { opacity: 0.35; cursor: default; }
 .vc-icon { width: 42px; }
 .vc-open {
-  padding: 0 18px 0 15px;
+  padding: 0 20px 0 16px;
   border-color: transparent;
   background: var(--accent-primary);
   color: var(--text-on-accent);
@@ -643,7 +1110,9 @@
 
 .vc-btn:focus-visible,
 .vc-cta:focus-visible,
-.vc-close:focus-visible {
+.vc-close:focus-visible,
+.vc-tab:focus-visible,
+.vc-tt-btn:focus-visible {
   outline: 0;
   box-shadow: var(--shadow-focus-ring);
 }
@@ -651,7 +1120,6 @@
 @keyframes vc-spin { to { transform: rotate(360deg); } }
 
 /* ========================== REDUCED MOTION ========================== */
-/* No tipping or spinning (JS cross-fades instead); nothing slides. */
 .vinyl-crate-root.is-still .vc-wrap,
 .vinyl-crate-root.is-still .vc-hint { transition: none; }
 .vinyl-crate-root.is-still .vc-spinner { animation: none; border-right-color: currentColor; opacity: 0.5; }
@@ -662,8 +1130,8 @@
 
 /* ============================== NARROW ============================== */
 @container (max-width: 560px) {
-  .vc-bar { flex-direction: column; align-items: stretch; }
+  .vc-bar-main { flex-direction: column; align-items: stretch; }
   .vc-buttons { width: 100%; }
   .vc-open { flex: 1; }
-  .vc-details { padding: 22px 20px 20px; }
+  .vc-details { padding: 20px 18px 18px; }
 }

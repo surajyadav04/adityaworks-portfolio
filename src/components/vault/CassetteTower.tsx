@@ -687,11 +687,13 @@ export default function CassetteTower({
 
     // ── Animation Loop (60 FPS Inertia Momentum Physics) ──────────────────────
     let animId: number;
-    const clock = new THREE.Clock();
+    let prevTime = performance.now();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
+      const now = performance.now();
+      const dt = Math.min((now - prevTime) / 1000, 0.05);
+      prevTime = now;
 
       if (!isPointerDragging) {
         liveStateRef.current.spinVelocity *= 0.93;

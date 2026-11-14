@@ -107,10 +107,6 @@ export default function WhoSection() {
         ease: "power2.inOut" 
       });
     }
-
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill());
-    };
   }, { scope: container });
 
   return (

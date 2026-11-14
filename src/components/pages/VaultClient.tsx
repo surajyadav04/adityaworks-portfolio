@@ -253,27 +253,9 @@ function generateDiscBackTexture(): THREE.CanvasTexture {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUILD 3D OPTICAL DISC WITH INTERACTIVE SPIN GROUP
+// SHARED 3D OPTICAL DISC GEOMETRIES & MATERIALS (Prevents 858x allocation)
 // ─────────────────────────────────────────────────────────────────────────────
-function buildDisc(
-  item: VaultItem,
-  index: number,
-  backTex: THREE.CanvasTexture,
-  texLoader: THREE.TextureLoader
-): {
-  group: THREE.Group;
-  spinGroup: THREE.Group;
-  frontMesh: THREE.Mesh;
-  backMesh: THREE.Mesh;
-  pickMesh: THREE.Mesh;
-} {
-  const group = new THREE.Group();
-
-  // Interactive Spin Group: isolated from gallery stack transforms
-  const spinGroup = new THREE.Group();
-  group.add(spinGroup);
-
-  // Custom UV Projection (A24 mapping formula)
+function createSharedDiscAssets(backTex: THREE.CanvasTexture) {
   const projectUVs = (geo: THREE.BufferGeometry) => {
     const pos = geo.attributes.position;
     const uvs = geo.attributes.uv;
@@ -283,54 +265,12 @@ function buildDisc(
     uvs.needsUpdate = true;
   };
 
-  // ── Front Face: Photographic Movie Picture or Procedural Artwork ──────────
   const frontGeo = new THREE.RingGeometry(A24.holeSize, 1.0, 220, 1);
   projectUVs(frontGeo);
 
-  let frontTex: THREE.Texture;
-  if (item.image) {
-    frontTex = texLoader.load(item.image);
-    frontTex.colorSpace = THREE.SRGBColorSpace;
-    frontTex.minFilter = THREE.LinearMipmapLinearFilter;
-    frontTex.generateMipmaps = true;
-  } else {
-    frontTex = generateFallbackDiscTexture(item, index);
-  }
-
-  const frontMat = new THREE.MeshPhysicalMaterial({
-    map: frontTex,
-    roughness: 0.3,
-    metalness: 0.15,
-    clearcoat: 0.65,
-    clearcoatRoughness: 0.08,
-    side: THREE.FrontSide,
-  });
-  const frontMesh = new THREE.Mesh(frontGeo, frontMat);
-  frontMesh.position.z = A24.discThickness * 0.5;
-  spinGroup.add(frontMesh);
-
-  // ── Back Face: Silver Anisotropic Iridescent ──────────────────────────────
   const backGeo = new THREE.RingGeometry(A24.holeSize, 1.0, 220, 1);
   projectUVs(backGeo);
 
-  const backMat = new THREE.MeshPhysicalMaterial({
-    map: backTex,
-    color: new THREE.Color(0xd0d0d0),
-    roughness: 0.15,
-    metalness: 0.9,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.05,
-    iridescence: A24.iridescence,
-    iridescenceIOR: A24.iridescenceIOR,
-    iridescenceThicknessRange: [140, 300] as [number, number],
-    side: THREE.FrontSide,
-  });
-  const backMesh = new THREE.Mesh(backGeo, backMat);
-  backMesh.rotation.y = Math.PI;
-  backMesh.position.z = -A24.discThickness * 0.5;
-  spinGroup.add(backMesh);
-
-  // ── Beveled Edge Rim (LatheGeometry rotated to match XY plane) ─────────────
   const T = A24.discThickness;
   const bevelSize = 0.0015 + A24.edgeBevel * Math.min(T * 0.55, 0.018);
   const edgeInner = 1 - A24.edgeBleed;
@@ -345,6 +285,28 @@ function buildDisc(
   const edgeGeo = new THREE.LatheGeometry(edgePoints, 256);
   edgeGeo.rotateX(Math.PI / 2);
 
+  const hubGeo = new THREE.RingGeometry(0.08, A24.hubSize, 128, 1);
+
+  const matrixInner = A24.hubSize * (1 - A24.hubMatrixWidth);
+  const matrixOuter = A24.hubSize;
+  const matrixGeo = new THREE.RingGeometry(matrixInner, matrixOuter, 128, 1);
+
+  const pickGeo = new THREE.CircleGeometry(1.05, 32);
+
+  const backMat = new THREE.MeshPhysicalMaterial({
+    map: backTex,
+    color: new THREE.Color(0xd0d0d0),
+    roughness: 0.15,
+    metalness: 0.9,
+    clearcoat: 1.0,
+    clearcoatRoughness: 0.05,
+    iridescence: A24.iridescence,
+    iridescenceIOR: A24.iridescenceIOR,
+    iridescenceThicknessMinimum: 140,
+    iridescenceThicknessMaximum: 300,
+    side: THREE.FrontSide,
+  });
+
   const edgeMat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(0xcccccc),
     roughness: 0.04,
@@ -353,11 +315,7 @@ function buildDisc(
     clearcoatRoughness: 0.05,
     side: THREE.DoubleSide,
   });
-  const edgeMesh = new THREE.Mesh(edgeGeo, edgeMat);
-  spinGroup.add(edgeMesh);
 
-  // ── Frosted Glass Hub (spindle ring from 0.08 to 0.24) ────────────────────
-  const hubGeo = new THREE.RingGeometry(0.08, A24.hubSize, 128, 1);
   const hubMat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(0xffffff),
     transmission: A24.hubTransmission,
@@ -366,19 +324,7 @@ function buildDisc(
     transparent: true,
     side: THREE.DoubleSide,
   });
-  const hubFront = new THREE.Mesh(hubGeo, hubMat);
-  hubFront.position.z = A24.discThickness * 0.5 + 0.001;
-  spinGroup.add(hubFront);
 
-  const hubBack = new THREE.Mesh(hubGeo, hubMat);
-  hubBack.rotation.y = Math.PI;
-  hubBack.position.z = -(A24.discThickness * 0.5 + 0.001);
-  spinGroup.add(hubBack);
-
-  // ── Hub Matrix Data Ring ──────────────────────────────────────────────────
-  const matrixInner = A24.hubSize * (1 - A24.hubMatrixWidth);
-  const matrixOuter = A24.hubSize;
-  const matrixGeo = new THREE.RingGeometry(matrixInner, matrixOuter, 128, 1);
   const matrixMat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(0x888888),
     roughness: 0.5,
@@ -387,23 +333,136 @@ function buildDisc(
     opacity: A24.hubMatrixIntensity,
     side: THREE.DoubleSide,
   });
-  const matrixFront = new THREE.Mesh(matrixGeo, matrixMat);
+
+  const pickMat = new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide });
+
+  const placeholderCanvas = document.createElement("canvas");
+  placeholderCanvas.width = 16;
+  placeholderCanvas.height = 16;
+  const pCtx = placeholderCanvas.getContext("2d")!;
+  pCtx.fillStyle = "#141414";
+  pCtx.fillRect(0, 0, 16, 16);
+  const placeholderTex = new THREE.CanvasTexture(placeholderCanvas);
+  placeholderTex.colorSpace = THREE.SRGBColorSpace;
+
+  return {
+    frontGeo,
+    backGeo,
+    edgeGeo,
+    hubGeo,
+    matrixGeo,
+    pickGeo,
+    backMat,
+    edgeMat,
+    hubMat,
+    matrixMat,
+    pickMat,
+    placeholderTex,
+    dispose() {
+      frontGeo.dispose();
+      backGeo.dispose();
+      edgeGeo.dispose();
+      hubGeo.dispose();
+      matrixGeo.dispose();
+      pickGeo.dispose();
+      backMat.dispose();
+      edgeMat.dispose();
+      hubMat.dispose();
+      matrixMat.dispose();
+      pickMat.dispose();
+      placeholderTex.dispose();
+    },
+  };
+}
+
+type SharedDiscAssets = ReturnType<typeof createSharedDiscAssets>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUILD 3D OPTICAL DISC WITH INTERACTIVE SPIN GROUP
+// ─────────────────────────────────────────────────────────────────────────────
+function buildDisc(
+  item: VaultItem,
+  index: number,
+  shared: SharedDiscAssets,
+  texLoader: THREE.TextureLoader,
+  initialActiveIdx: number
+): {
+  group: THREE.Group;
+  spinGroup: THREE.Group;
+  frontMesh: THREE.Mesh;
+  backMesh: THREE.Mesh;
+  pickMesh: THREE.Mesh;
+  texLoaded: boolean;
+} {
+  const group = new THREE.Group();
+
+  // Interactive Spin Group: isolated from gallery stack transforms
+  const spinGroup = new THREE.Group();
+  group.add(spinGroup);
+
+  // ── Front Face: Photographic Movie Picture or Procedural Artwork ──────────
+  let frontTex: THREE.Texture = shared.placeholderTex;
+  let texLoaded = false;
+  if (Math.abs(index - initialActiveIdx) <= 6) {
+    texLoaded = true;
+    if (item.image) {
+      frontTex = texLoader.load(item.image);
+      frontTex.colorSpace = THREE.SRGBColorSpace;
+      frontTex.minFilter = THREE.LinearMipmapLinearFilter;
+      frontTex.generateMipmaps = true;
+    } else {
+      frontTex = generateFallbackDiscTexture(item, index);
+    }
+  }
+
+  const frontMat = new THREE.MeshPhysicalMaterial({
+    map: frontTex,
+    roughness: 0.3,
+    metalness: 0.15,
+    clearcoat: 0.65,
+    clearcoatRoughness: 0.08,
+    side: THREE.FrontSide,
+  });
+  const frontMesh = new THREE.Mesh(shared.frontGeo, frontMat);
+  frontMesh.position.z = A24.discThickness * 0.5;
+  spinGroup.add(frontMesh);
+
+  // ── Back Face: Silver Anisotropic Iridescent ──────────────────────────────
+  const backMesh = new THREE.Mesh(shared.backGeo, shared.backMat);
+  backMesh.rotation.y = Math.PI;
+  backMesh.position.z = -A24.discThickness * 0.5;
+  spinGroup.add(backMesh);
+
+  // ── Beveled Edge Rim ──────────────────────────────────────────────────────
+  const edgeMesh = new THREE.Mesh(shared.edgeGeo, shared.edgeMat);
+  spinGroup.add(edgeMesh);
+
+  // ── Frosted Glass Hub (spindle ring from 0.08 to 0.24) ────────────────────
+  const hubFront = new THREE.Mesh(shared.hubGeo, shared.hubMat);
+  hubFront.position.z = A24.discThickness * 0.5 + 0.001;
+  spinGroup.add(hubFront);
+
+  const hubBack = new THREE.Mesh(shared.hubGeo, shared.hubMat);
+  hubBack.rotation.y = Math.PI;
+  hubBack.position.z = -(A24.discThickness * 0.5 + 0.001);
+  spinGroup.add(hubBack);
+
+  // ── Hub Matrix Data Ring ──────────────────────────────────────────────────
+  const matrixFront = new THREE.Mesh(shared.matrixGeo, shared.matrixMat);
   matrixFront.position.z = A24.discThickness * 0.5 + 0.0005;
   spinGroup.add(matrixFront);
 
-  const matrixBack = new THREE.Mesh(matrixGeo, matrixMat);
+  const matrixBack = new THREE.Mesh(shared.matrixGeo, shared.matrixMat);
   matrixBack.rotation.y = Math.PI;
   matrixBack.position.z = -(A24.discThickness * 0.5 + 0.0005);
   spinGroup.add(matrixBack);
 
   // ── Invisible Raycast Pick Cylinder (Ensures 100% reliable click/hover capture) ──
-  const pickGeo = new THREE.CircleGeometry(1.05, 32);
-  const pickMat = new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide });
-  const pickMesh = new THREE.Mesh(pickGeo, pickMat);
+  const pickMesh = new THREE.Mesh(shared.pickGeo, shared.pickMat);
   pickMesh.userData = { index };
   spinGroup.add(pickMesh);
 
-  return { group, spinGroup, frontMesh, backMesh, pickMesh };
+  return { group, spinGroup, frontMesh, backMesh, pickMesh, texLoaded };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -433,6 +492,7 @@ interface DiscEntry {
   hoverTiltY: number;
   hoverFactor: number;
   resetTween: gsap.core.Tween | null;
+  texLoaded: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -547,16 +607,18 @@ export default function VaultClient() {
 
     // ── Instantiate Disc Stack with Movie Pictures ────────────────────────────
     const backTex = generateDiscBackTexture();
+    const sharedDiscAssets = createSharedDiscAssets(backTex);
     const texLoader = new THREE.TextureLoader();
     const discEntries: DiscEntry[] = [];
 
     const currentItems = liveRef.current.items;
     currentItems.forEach((item, idx) => {
-      const { group, spinGroup, frontMesh, backMesh, pickMesh } = buildDisc(
+      const { group, spinGroup, frontMesh, backMesh, pickMesh, texLoaded } = buildDisc(
         item,
         idx,
-        backTex,
-        texLoader
+        sharedDiscAssets,
+        texLoader,
+        liveRef.current.activeIndex
       );
 
       const offset = idx - liveRef.current.activeIndex;
@@ -569,6 +631,7 @@ export default function VaultClient() {
           ? A24.galleryScale
           : Math.max(A24.inactiveScale, A24.galleryScale - Math.abs(offset) * 0.14);
       group.scale.set(initScale, initScale, initScale);
+      group.visible = Math.abs(offset) <= 6;
 
       galleryGroup.add(group);
       discEntries.push({
@@ -585,6 +648,7 @@ export default function VaultClient() {
         hoverTiltY: 0,
         hoverFactor: 0,
         resetTween: null,
+        texLoaded,
       });
     });
 
@@ -640,13 +704,18 @@ export default function VaultClient() {
       pointerVec.y = -((clientY / H) * 2 - 1);
       raycaster.setFromCamera(pointerVec, camera);
 
-      const intersects = raycaster.intersectObjects(galleryGroup.children, true);
+      const targetIdx = liveRef.current.activeIndex;
+      const candidates: THREE.Object3D[] = [];
+      const minI = Math.max(0, targetIdx - 6);
+      const maxI = Math.min(discEntries.length - 1, targetIdx + 6);
+      for (let i = minI; i <= maxI; i++) {
+        candidates.push(discEntries[i].pickMesh);
+      }
+
+      const intersects = raycaster.intersectObjects(candidates, false);
       if (intersects.length > 0) {
-        let hit: THREE.Object3D | null = intersects[0].object;
-        while (hit && hit.parent && hit.parent !== galleryGroup) {
-          hit = hit.parent;
-        }
-        return discEntries.find((d) => d.group === hit) ?? null;
+        const idx = intersects[0].object.userData?.index;
+        return typeof idx === "number" ? discEntries[idx] ?? null : null;
       }
       return null;
     };
@@ -775,12 +844,15 @@ export default function VaultClient() {
 
     // ── Animation Loop (60 FPS Physical Interpolation) ─────────────────────────
     let animId: number;
-    const clock = new THREE.Clock();
+    const startTime = performance.now();
+    let prevTime = startTime;
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const elapsed = clock.elapsedTime;
+      const now = performance.now();
+      const dt = Math.min((now - prevTime) / 1000, 0.05);
+      prevTime = now;
+      const elapsed = (now - startTime) / 1000;
 
       const targetIdx = liveRef.current.activeIndex;
       const flippedGlobal = liveRef.current.isFlipped;
@@ -797,6 +869,30 @@ export default function VaultClient() {
         const offset = d.index - targetIdx;
         const absOffset = Math.abs(offset);
         const isActive = offset === 0;
+
+        if (absOffset > 6) {
+          d.group.visible = false;
+          return;
+        }
+        d.group.visible = true;
+
+        if (!d.texLoaded) {
+          d.texLoaded = true;
+          if (d.item.image) {
+            texLoader.load(d.item.image, (loadedTex) => {
+              loadedTex.colorSpace = THREE.SRGBColorSpace;
+              loadedTex.minFilter = THREE.LinearMipmapLinearFilter;
+              loadedTex.generateMipmaps = true;
+              const mat = d.frontMesh.material as THREE.MeshPhysicalMaterial;
+              mat.map = loadedTex;
+              mat.needsUpdate = true;
+            });
+          } else {
+            const mat = d.frontMesh.material as THREE.MeshPhysicalMaterial;
+            mat.map = generateFallbackDiscTexture(d.item, d.index);
+            mat.needsUpdate = true;
+          }
+        }
 
         // Position interpolation
         const tX = offset * A24.hGap;
@@ -870,18 +966,13 @@ export default function VaultClient() {
 
       discEntries.forEach((d) => {
         if (d.resetTween) d.resetTween.kill();
-        d.group.traverse((obj) => {
-          if ((obj as THREE.Mesh).isMesh) {
-            const mesh = obj as THREE.Mesh;
-            mesh.geometry.dispose();
-            if (Array.isArray(mesh.material)) {
-              mesh.material.forEach((m) => m.dispose());
-            } else {
-              (mesh.material as THREE.Material).dispose();
-            }
-          }
-        });
+        const frontMat = d.frontMesh.material as THREE.MeshPhysicalMaterial;
+        if (frontMat.map && frontMat.map !== sharedDiscAssets.placeholderTex) {
+          frontMat.map.dispose();
+        }
+        frontMat.dispose();
       });
+      sharedDiscAssets.dispose();
       backTex.dispose();
       envMap.dispose();
       renderer.dispose();

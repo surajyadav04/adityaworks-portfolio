@@ -14,6 +14,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   useGSAP(() => {
+    if (!container.current) return;
     gsap.from(".nav-item", {
       y: -20,
       opacity: 0,

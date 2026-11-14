@@ -33,7 +33,7 @@ export default function AboutSection() {
         </p>
 
         <p className="reveal-text text-body text-text-light leading-relaxed max-w-2xl">
-          I believe that every pixel should serve a purpose and every interaction should tell a story. My work lives at the intersection of technological precision and human-centric design, creating experiences that don't just look premium but feel intentional.
+          I believe that every pixel should serve a purpose and every interaction should tell a story. My work lives at the intersection of technological precision and human-centric design, creating experiences that don&apos;t just look premium but feel intentional.
         </p>
       </div>
     </section>

@@ -64,8 +64,8 @@ export default function ProjectShowcaseClient({ slug }: Props) {
   useGSAP(() => {
     if (!isLoaded || !container.current) return;
     
-    const cards = gsap.utils.toArray(".term-card");
-    cards.forEach((card: any) => {
+    const cards = gsap.utils.toArray<HTMLElement>(".term-card");
+    cards.forEach((card) => {
       const definition = card.querySelector(".term-definition");
       const tl = gsap.timeline({ paused: true });
       

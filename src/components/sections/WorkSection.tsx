@@ -36,8 +36,8 @@ export default function WorkSection() {
         ease: "power3.out",
       });
 
-      const cards = gsap.utils.toArray(".project-card");
-      cards.forEach((card: any) => {
+      const cards = gsap.utils.toArray<HTMLElement>(".project-card");
+      cards.forEach((card) => {
         const img = card.querySelector("img");
         const overlay = card.querySelector(".hover-overlay");
 
