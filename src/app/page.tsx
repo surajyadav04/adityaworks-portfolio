@@ -38,9 +38,10 @@ export default function Home() {
       
       if (viewMode === "WORK") {
         gsap.set(introRef.current, { display: "none", opacity: 0 });
-        gsap.set(workContainerRef.current, { display: "block", opacity: 1, y: 0 });
+        gsap.set(workContainerRef.current, { display: "block", opacity: 1, clearProps: "transform" });
       } else {
-        gsap.set(introRef.current, { display: "block", opacity: 1, y: 0 });
+        // NOTE: never leave a transform on this wrapper — it breaks ScrollTrigger pinning (position: fixed)
+        gsap.set(introRef.current, { display: "block", opacity: 1, clearProps: "transform" });
         gsap.set(workContainerRef.current, { display: "none", opacity: 0 });
       }
       return;
@@ -71,7 +72,11 @@ export default function Home() {
       // 🛬 REVEAL WORK VIEW ONLY
       .fromTo(workContainerRef.current, 
         { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }
+        {
+          opacity: 1, y: 0, duration: 0.55, ease: "power2.out",
+          clearProps: "transform",
+          onComplete: () => ScrollTrigger.refresh(),
+        }
       );
     } else {
       // 🛫 EXIT WORK VIEW
@@ -90,7 +95,11 @@ export default function Home() {
       // 🛬 REVEAL PROFILE VIEW
       .fromTo(introRef.current, 
         { opacity: 0, y: -30 },
-        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }
+        {
+          opacity: 1, y: 0, duration: 0.55, ease: "power2.out",
+          clearProps: "transform",
+          onComplete: () => ScrollTrigger.refresh(),
+        }
       );
     }
   }, [viewMode]);

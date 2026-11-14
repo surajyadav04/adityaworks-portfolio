@@ -62,7 +62,7 @@ export default function Navbar() {
     >
       <Link 
         href="/" 
-        className="nav-item font-bold text-xl tracking-tighter text-text hover:opacity-80 transition-opacity"
+        className="font-bold text-xl tracking-tighter text-text hover:opacity-80 transition-opacity"
       >
         Aditya/Works
       </Link>

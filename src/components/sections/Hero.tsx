@@ -16,7 +16,7 @@ export default function Hero() {
       duration: 1.2,
       stagger: 0.2,
       ease: "power4.out",
-      delay: 0.8,
+      delay: 0.1,
     })
     .from(".hero-sub", {
       opacity: 0,
